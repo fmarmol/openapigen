@@ -50,14 +50,14 @@ func TestBuilder(t *testing.T) {
 					NewResponse(200).Description("OK").JSON(Person{}),
 				),
 			NewPath("/requests/{id}/things").Get().Tags("things").OperationID("GetOneThing").
-				Parameter(Parameter{in: "path", format: "uuid", _type: "string", required: true, name: "id"}).
+				Parameter(Parameter{In: "path", Format: "uuid", Type: "string", Required: true, Name: "id"}).
 				Responses(
 					NewResponse(200).Description("OK").JSON(MyResponse{}),
 					NewResponse(500).Description("ERROR").JSON(Error{}),
 				),
 			NewPath("/requests/{id}/thing").Post().Tags("thing").OperationID("CreateOneThing").
-				Parameter(Parameter{in: "path", format: "uuid", _type: "string", required: true, name: "id"}).
-				Parameter(Parameter{in: "query", name: "type", ref: MyEnum{}}).
+				Parameter(Parameter{In: "path", Format: "uuid", Type: "string", Required: true, Name: "id"}).
+				Parameter(Parameter{In: "query", Name: "type", Ref: MyEnum{}}).
 				FormData(MyBody{}).
 				Responses(
 					NewResponse(200).Description("OK").JSON(MyResponse{}),
@@ -66,6 +66,6 @@ func TestBuilder(t *testing.T) {
 		)
 
 	buffer := bytes.NewBuffer(nil)
-	err := doc.Write(buffer)
+	err := doc.Write(buffer, 2)
 	require.NoError(t, err)
 }

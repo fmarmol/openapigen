@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/fmarmol/openapigen/utils"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -159,6 +160,9 @@ func Properties(object any) ([]Property, []*Schema) {
 		case reflect.TypeOf(uuid.UUID{}):
 			property._type = "string"
 			property.format = "uuid"
+		case reflect.TypeOf(time.Time{}):
+			property._type = "string"
+			property.format = "date-time"
 		default:
 			//nolint:all
 			switch field.Type.Kind() {
@@ -284,22 +288,17 @@ func setPathItemOperation(method string, pi *openapi3.PathItem, op *openapi3.Ope
 	return nil
 }
 
-func (d *Document) Write(w io.Writer) error {
+func (d *Document) Write(w io.Writer, indent int) error {
 	specs, err := d.Build()
 	if err != nil {
 		return err
 	}
-	n, err := w.Write(specs)
-	if err != nil {
-		return err
-	}
-	if n != len(specs) {
-		return fmt.Errorf("invalid write: %d byte written instead of %d bytes", n, len(specs))
-	}
-	return nil
+	enc := yaml.NewEncoder(w)
+	enc.SetIndent(indent)
+	return enc.Encode(specs)
 }
 
-func (d *Document) Build() ([]byte, error) {
+func (d *Document) Build() (any, error) {
 
 	if d.t == nil {
 		servers := utils.Map(d.servers, func(s string) *openapi3.Server {
@@ -383,9 +382,5 @@ func (d *Document) Build() ([]byte, error) {
 
 	}
 	// returns a map
-	m, err := d.t.MarshalYAML()
-	if err != nil {
-		return nil, err
-	}
-	return yaml.Marshal(m)
+	return d.t.MarshalYAML()
 }

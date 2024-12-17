@@ -7,12 +7,12 @@ import (
 )
 
 type Parameter struct {
-	name     string
-	in       string
-	_type    string
-	format   string
-	required bool
-	ref      any
+	Name     string
+	In       string
+	Type     string
+	Format   string
+	Required bool
+	Ref      any
 }
 
 type Path struct {
@@ -70,13 +70,13 @@ func (p *Path) FormData(obj any) *Path {
 
 func (p *Path) Parameter(param Parameter) *Path {
 
-	if param.ref != nil {
-		schema := NewSchema(param.ref)
+	if param.Ref != nil {
+		schema := NewSchema(param.Ref)
 		p.parameters = append(p.parameters, &openapi3.ParameterRef{
 			Value: &openapi3.Parameter{
-				In:       param.in,
-				Name:     param.name,
-				Required: param.required,
+				In:       param.In,
+				Name:     param.Name,
+				Required: param.Required,
 				Schema: &openapi3.SchemaRef{
 					Ref: schema.RefPath(),
 				},
@@ -85,17 +85,17 @@ func (p *Path) Parameter(param Parameter) *Path {
 		p.registerSchema(schema)
 		return p
 	}
-	_type := &openapi3.Types{param._type}
+	_type := &openapi3.Types{param.Type}
 
 	p.parameters = append(p.parameters, &openapi3.ParameterRef{
 		Value: &openapi3.Parameter{
-			In:       param.in,
-			Name:     param.name,
-			Required: param.required,
+			In:       param.In,
+			Name:     param.Name,
+			Required: param.Required,
 			Schema: &openapi3.SchemaRef{
 				Value: &openapi3.Schema{
 					Type:   _type,
-					Format: param.format,
+					Format: param.Format,
 				},
 			},
 		},
