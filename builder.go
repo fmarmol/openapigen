@@ -105,6 +105,7 @@ func Properties(object any) ([]Property, []*Schema) {
 
 	for i := range _type.NumField() {
 		field := _type.Field(i)
+		fieldName := ToSnakeCase(field.Name)
 		if !field.IsExported() {
 			continue
 		}
@@ -112,7 +113,6 @@ func Properties(object any) ([]Property, []*Schema) {
 
 		tag := field.Tag.Get("oapi")
 		if tag == "" {
-			fieldName := ToSnakeCase(field.Name)
 			property.name = fieldName
 
 		} else {
@@ -122,6 +122,8 @@ func Properties(object any) ([]Property, []*Schema) {
 			}
 			if value, ok := tagFieldLookUp(tagValues, "name"); ok {
 				property.name = value
+			} else {
+				property.name = fieldName
 			}
 			if value, ok := tagFieldLookUp(tagValues, "format"); ok {
 				property.format = value
