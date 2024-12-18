@@ -2,6 +2,7 @@ package openapigen
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -70,5 +71,6 @@ func TestBuilder(t *testing.T) {
 
 	buffer := bytes.NewBuffer(nil)
 	err := doc.Write(buffer, 2)
+	fmt.Println(buffer.String())
 	require.NoError(t, err)
 }

@@ -310,16 +310,17 @@ func setPathItemOperation(method string, pi *openapi3.PathItem, op *openapi3.Ope
 }
 
 func (d *Document) Write(w io.Writer, indent int) error {
-	specs, err := d.Build()
+	err := d.Build()
 	if err != nil {
 		return err
 	}
+	finalDoc := NewYamlDocument(d)
 	enc := yaml.NewEncoder(w)
 	enc.SetIndent(indent)
-	return enc.Encode(specs)
+	return enc.Encode(finalDoc)
 }
 
-func (d *Document) Build() (any, error) {
+func (d *Document) Build() error {
 
 	if d.t == nil {
 		servers := utils.Map(d.servers, func(s string) *openapi3.Server {
@@ -397,11 +398,12 @@ func (d *Document) Build() (any, error) {
 
 		err := setPathItemOperation(path.method, pathItem, operation)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		d.t.Paths.Set(path.path, pathItem)
 
 	}
+	return nil
 	// returns a map
-	return d.t.MarshalYAML()
+	// return d.t.MarshalYAML()
 }
