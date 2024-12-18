@@ -39,8 +39,10 @@ type Property struct {
 
 type Schema struct {
 	object any
+	owner  *Schema
 	name   string
 	enums  []any
+	array  bool
 }
 
 func (s *Schema) RefPath() string {
@@ -74,11 +76,63 @@ func tagFieldLookUp(tags []string, key string) (string, bool) {
 
 }
 
+func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) []*Schema {
+	kind := _type.Kind()
+	switch kind {
+	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
+		property._type = "integer"
+	case reflect.Float64:
+		property._type = "number"
+		property.format = "double"
+	case reflect.Float32:
+		property._type = "number"
+		property.format = "float"
+	case reflect.Bool:
+		property._type = "boolean"
+	case reflect.String:
+		property._type = "string"
+	case reflect.Struct:
+		newSchema := NewSchema(reflect.New(_type).Elem().Interface())
+		property.ref = newSchema.RefPath()
+		newSchemas = append(newSchemas, newSchema)
+	case reflect.Slice:
+		elemType := _type.Elem()
+		if elemType.Kind() == reflect.Struct {
+			newSchema := NewSchema(reflect.New(_type.Elem()).Elem().Interface())
+			property.itemsRef = newSchema.RefPath()
+			newSchemas = append(newSchemas, newSchema)
+		} else {
+			property.items = true
+			switch elemType {
+			case reflect.TypeOf(uuid.UUID{}):
+				property._type = "string"
+				property.format = "uuid"
+			default:
+				newSchemas = setProperty(property, newSchemas, elemType)
+			}
+		}
+	default:
+		panic(fmt.Errorf("kind %v not supported yet", _type.Kind()))
+	}
+	return newSchemas
+
+}
+
 func Properties(object any) ([]Property, []*Schema) {
 	ret := []Property{}
 	newSchemas := []*Schema{}
 
 	_type := reflect.TypeOf(object)
+	if _type.Kind() == reflect.Slice {
+		elemType := _type.Elem()
+		if elemType.Kind() == reflect.Struct {
+			newSchema := NewSchema(reflect.New(_type.Elem()).Elem().Interface())
+			newSchema.array = true
+			newSchema.owner = NewSchema(object)
+			newSchemas = append(newSchemas, newSchema)
+		}
+		return ret, newSchemas
+	}
 
 	if _type.Kind() != reflect.Struct {
 		panic(fmt.Errorf("object %v is not a struct", _type.Name()))
@@ -166,48 +220,7 @@ func Properties(object any) ([]Property, []*Schema) {
 			property._type = "string"
 			property.format = "date-time"
 		default:
-			//nolint:all
-			switch field.Type.Kind() {
-			case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
-				property._type = "integer"
-			case reflect.Float64:
-				property._type = "number"
-				property.format = "double"
-			case reflect.Float32:
-				property._type = "number"
-				property.format = "float"
-			case reflect.Bool:
-				property._type = "boolean"
-			case reflect.String:
-				property._type = "string"
-			case reflect.Struct:
-				newSchema := NewSchema(reflect.New(field.Type).Elem().Interface())
-				property.ref = newSchema.RefPath()
-				newSchemas = append(newSchemas, newSchema)
-			case reflect.Slice:
-				elemType := field.Type.Elem()
-				if elemType.Kind() == reflect.Struct {
-					newSchema := NewSchema(reflect.New(field.Type.Elem()).Elem().Interface())
-					property.itemsRef = newSchema.RefPath()
-					newSchemas = append(newSchemas, newSchema)
-				} else {
-					property.items = true
-					switch elemType {
-					case reflect.TypeOf(uuid.UUID{}):
-						property._type = "string"
-						property.format = "uuid"
-					default:
-						switch elemType.Kind() {
-						case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
-							property._type = "integer"
-						case reflect.String:
-							property._type = "string"
-						}
-					}
-				}
-			default:
-				panic(fmt.Errorf("kind %v not supported yet", field.Type.Kind()))
-			}
+			newSchemas = setProperty(&property, newSchemas, field.Type)
 		}
 		ret = append(ret, property)
 

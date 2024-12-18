@@ -42,13 +42,15 @@ type Person struct {
 	Age       float32
 }
 
+type Persons []Person
+
 func TestBuilder(t *testing.T) {
 	doc := &Document{Version: "0.0.1", Title: "awesome api"}
 	doc.Server("/api").Server("/api/v3").BearerAuth().
 		Paths(
 			NewPath("/request/things").Get().Tags("things").OperationID("GetThings").
 				Response(
-					NewResponse(200).Description("OK").JSON(Person{}),
+					NewResponse(200).Description("OK").JSON(Persons{}),
 				),
 			NewPath("/requests/{id}/things").Get().Tags("things").OperationID("GetOneThing").
 				Parameter(Parameter{In: "path", Format: "uuid", Type: "string", Required: true, Name: "id"}).

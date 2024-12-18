@@ -166,6 +166,15 @@ func (p *Path) registerSchema(s *Schema) {
 		p.apiSchemas[s.ObjectName()] = openapi3.NewSchemaRef("", value)
 		return
 	}
+	if s.array {
+		value.Type = &openapi3.Types{"array"}
+		value.Items = &openapi3.SchemaRef{
+			Ref: s.RefPath(),
+		}
+		p.apiSchemas[s.owner.ObjectName()] = openapi3.NewSchemaRef("", value)
+		p.registerSchema(NewSchema(s.object)) // need to register the child
+		return
+	}
 
 	properties, newSchemas := s.Properties()
 
