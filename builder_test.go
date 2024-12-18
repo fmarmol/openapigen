@@ -39,6 +39,7 @@ type Addr struct {
 type Person struct {
 	Name      string
 	Addresses []Addr
+	Age       float32
 }
 
 func TestBuilder(t *testing.T) {
