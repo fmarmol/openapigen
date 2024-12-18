@@ -170,9 +170,12 @@ func Properties(object any) ([]Property, []*Schema) {
 			switch field.Type.Kind() {
 			case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
 				property._type = "integer"
-			case reflect.Float32, reflect.Float64:
+			case reflect.Float64:
 				property._type = "number"
 				property.format = "double"
+			case reflect.Float32:
+				property._type = "number"
+				property.format = "float"
 			case reflect.Bool:
 				property._type = "boolean"
 			case reflect.String:
