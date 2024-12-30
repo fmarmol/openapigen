@@ -79,8 +79,14 @@ func tagFieldLookUp(tags []string, key string) (string, bool) {
 func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) []*Schema {
 	kind := _type.Kind()
 	switch kind {
-	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
+	case reflect.Int8, reflect.Int16, reflect.Int:
 		property._type = "integer"
+	case reflect.Int32:
+		property._type = "integer"
+		property.format = "int32"
+	case reflect.Int64:
+		property._type = "integer"
+		property.format = "int64"
 	case reflect.Float64:
 		property._type = "number"
 		property.format = "double"
