@@ -62,6 +62,7 @@ func TestBuilder(t *testing.T) {
 			NewPath("/requests/{id}/thing").Post().Tags("thing").OperationID("CreateOneThing").
 				Parameter(Parameter{In: "path", Format: "uuid", Type: "string", Required: true, Name: "id"}).
 				Parameter(Parameter{In: "query", Name: "type", Ref: MyEnum{}}).
+				Parameter(Parameter{In: "query", Name: "toto", Ref: []uuid.UUID{}}).
 				FormData(MyBody{}).
 				Responses(
 					NewResponse(200).Description("OK").JSON(MyResponse{}),

@@ -13,6 +13,7 @@ type Parameter struct {
 	Format   string
 	Required bool
 	Ref      any
+	Array    bool
 }
 
 type Path struct {
@@ -71,6 +72,29 @@ func (p *Path) FormData(obj any) *Path {
 func (p *Path) Parameter(param Parameter) *Path {
 
 	if param.Ref != nil {
+		if t, ok := isSlice(param.Ref); ok {
+			prop := typeToProp(t)
+			p.parameters = append(p.parameters, &openapi3.ParameterRef{
+				Value: &openapi3.Parameter{
+					In:       param.In,
+					Name:     param.Name,
+					Required: param.Required,
+					Schema: &openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"array"},
+							Items: &openapi3.SchemaRef{
+								Value: &openapi3.Schema{
+									Type:   &openapi3.Types{prop._type},
+									Format: prop.format,
+								},
+							},
+						},
+					},
+				},
+			})
+			return p
+		}
+
 		schema := NewSchema(param.Ref)
 		p.parameters = append(p.parameters, &openapi3.ParameterRef{
 			Value: &openapi3.Parameter{
