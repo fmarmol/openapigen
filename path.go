@@ -13,7 +13,6 @@ type Parameter struct {
 	Format   string
 	Required bool
 	Ref      any
-	Array    bool
 }
 
 type Path struct {
