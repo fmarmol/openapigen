@@ -3,6 +3,7 @@ package openapigen
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/google/uuid"
 )
@@ -54,4 +55,16 @@ func typeToProp(_type reflect.Type) Property {
 		panic(fmt.Errorf("kind %v not supported in kindToProp", kind))
 	}
 	return property
+}
+
+func parseString(value string) any {
+	if bool, err := strconv.ParseBool(value); err == nil {
+		return bool
+	} else if val, err := strconv.ParseInt(value, 10, 64); err == nil {
+		return val
+	} else if val, err := strconv.ParseFloat(value, 64); err == nil {
+		return val
+	} else {
+		return value
+	}
 }

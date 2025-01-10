@@ -38,6 +38,8 @@ type Property struct {
 	description string
 	deprecated  bool
 	_default    any
+	minimum     *float64
+	maximum     *float64
 }
 
 type Schema struct {
@@ -198,14 +200,16 @@ func Properties(object any) ([]Property, []*Schema) {
 				property.deprecated = true
 			}
 			if value, ok := tagFieldLookUp(tagValues, "default"); ok {
-				if bool, err := strconv.ParseBool(value); err == nil {
-					property._default = bool
-				} else if val, err := strconv.ParseInt(value, 10, 64); err == nil {
-					property._default = val
-				} else if val, err := strconv.ParseFloat(value, 64); err == nil {
-					property._default = val
-				} else {
-					property._default = value
+				property._default = parseString(value)
+			}
+			if value, ok := tagFieldLookUp(tagValues, "min"); ok {
+				if val, err := strconv.ParseFloat(value, 64); err == nil {
+					property.minimum = &val
+				}
+			}
+			if value, ok := tagFieldLookUp(tagValues, "max"); ok {
+				if val, err := strconv.ParseFloat(value, 64); err == nil {
+					property.maximum = &val
 				}
 			}
 			if slices.Contains(tagValues, "required:true") {

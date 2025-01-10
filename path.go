@@ -218,6 +218,8 @@ func (p *Path) registerSchema(s *Schema) {
 							Description: property.description,
 							Deprecated:  property.deprecated,
 							Default:     property._default,
+							Min:         property.minimum,
+							Max:         property.maximum,
 						},
 					},
 				},
@@ -248,6 +250,8 @@ func (p *Path) registerSchema(s *Schema) {
 					Description: property.description,
 					Deprecated:  property.deprecated,
 					Default:     property._default,
+					Min:         property.minimum,
+					Max:         property.maximum,
 				},
 			}
 		}
