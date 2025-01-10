@@ -216,6 +216,7 @@ func (p *Path) registerSchema(s *Schema) {
 							Type:        &openapi3.Types{property._type},
 							Format:      property.format,
 							Description: property.description,
+							Deprecated:  property.deprecated,
 						},
 					},
 				},
@@ -244,6 +245,7 @@ func (p *Path) registerSchema(s *Schema) {
 					Type:        &openapi3.Types{property._type},
 					Format:      property.format,
 					Description: property.description,
+					Deprecated:  property.deprecated,
 				},
 			}
 		}

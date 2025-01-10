@@ -35,6 +35,7 @@ type Property struct {
 	itemsRef    string
 	required    bool
 	description string
+	deprecated  bool
 }
 
 type Schema struct {
@@ -190,6 +191,9 @@ func Properties(object any) ([]Property, []*Schema) {
 			}
 			if value, ok := tagFieldLookUp(tagValues, "description"); ok {
 				property.description = value
+			}
+			if _, ok := tagFieldLookUp(tagValues, "deprecated"); ok {
+				property.deprecated = true
 			}
 			if slices.Contains(tagValues, "required:true") {
 				property.required = true

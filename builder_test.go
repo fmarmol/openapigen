@@ -38,7 +38,7 @@ type Addr struct {
 }
 
 type Person struct {
-	Name      string
+	Name      string `oapi:"required:true,deprecated:true"`
 	Addresses []Addr
 	Age       float32
 }
