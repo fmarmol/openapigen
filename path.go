@@ -217,6 +217,7 @@ func (p *Path) registerSchema(s *Schema) {
 							Format:      property.format,
 							Description: property.description,
 							Deprecated:  property.deprecated,
+							Default:     property._default,
 						},
 					},
 				},
@@ -246,6 +247,7 @@ func (p *Path) registerSchema(s *Schema) {
 					Format:      property.format,
 					Description: property.description,
 					Deprecated:  property.deprecated,
+					Default:     property._default,
 				},
 			}
 		}

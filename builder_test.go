@@ -40,7 +40,7 @@ type Addr struct {
 type Person struct {
 	Name      string `oapi:"required:true,deprecated:true"`
 	Addresses []Addr
-	Age       float32
+	Age       float32 `oapi:"default:23"`
 }
 
 type Persons []Person
