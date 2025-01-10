@@ -260,8 +260,12 @@ func (p *Path) Response(r *Response) *Path {
 	if r.json == nil {
 		return p
 	}
+	codeStr := fmt.Sprint(r.code)
+	if r.code == -1 {
+		codeStr = "default"
+	}
 
-	p.apiResponses[fmt.Sprint(r.code)] = &openapi3.ResponseRef{
+	p.apiResponses[codeStr] = &openapi3.ResponseRef{
 		Value: &openapi3.Response{
 			Description: &r.description,
 			Content: openapi3.Content{

@@ -51,7 +51,8 @@ func TestBuilder(t *testing.T) {
 		Paths(
 			NewPath("/batches/").Get().OperationID("listBatches").
 				Responses(
-					NewResponse(200).Description("OK"),
+					NewResponse(200).JSON(Person{}).Description("OK"),
+					NewResponse(-1).JSON(Person{}).Description("DEFAULT"),
 				),
 			NewPath("/batches/").Post().OperationID("createBatches").
 				Responses(

@@ -239,7 +239,7 @@ func NewSchema(ref any) *Schema {
 }
 
 type Response struct {
-	code        int
+	code        int // -1 for default
 	description string
 	json        *Schema
 }
