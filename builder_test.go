@@ -49,25 +49,33 @@ func TestBuilder(t *testing.T) {
 	doc := &Document{Version: "0.0.1", Title: "awesome api"}
 	doc.Server("/api").Server("/api/v3").BearerAuth().
 		Paths(
-			NewPath("/request/things").Get().Tags("things").OperationID("GetThings").
-				Response(
-					NewResponse(200).Description("OK").JSON(Persons{}),
-				),
-			NewPath("/requests/{id}/things").Get().Tags("things").OperationID("GetOneThing").
-				Parameter(Parameter{In: "path", Format: "uuid", Type: "string", Required: true, Name: "id"}).
+			NewPath("/batches/").Get().OperationID("listBatches").
 				Responses(
-					NewResponse(200).Description("OK").JSON(MyResponse{}),
-					NewResponse(500).Description("ERROR").JSON(Error{}),
+					NewResponse(200).Description("OK"),
 				),
-			NewPath("/requests/{id}/thing").Post().Tags("thing").OperationID("CreateOneThing").
-				Parameter(Parameter{In: "path", Format: "uuid", Type: "string", Required: true, Name: "id"}).
-				Parameter(Parameter{In: "query", Name: "type", Ref: MyEnum{}}).
-				Parameter(Parameter{In: "query", Name: "toto", Ref: []uuid.UUID{}}).
-				FormData(MyBody{}).
+			NewPath("/batches/").Post().OperationID("createBatches").
 				Responses(
-					NewResponse(200).Description("OK").JSON(MyResponse{}),
-					NewResponse(500).Description("ERROR").JSON(Error{}),
+					NewResponse(200).Description("OK"),
 				),
+			// NewPath("/request/things").Get().Tags("things").OperationID("GetThings").
+			// 	Response(
+			// 		NewResponse(200).Description("OK").JSON(Persons{}),
+			// 	),
+			// NewPath("/requests/{id}/things").Get().Tags("things").OperationID("GetOneThing").
+			// 	Parameter(Parameter{In: "path", Format: "uuid", Type: "string", Required: true, Name: "id"}).
+			// 	Responses(
+			// 		NewResponse(200).Description("OK").JSON(MyResponse{}),
+			// 		NewResponse(500).Description("ERROR").JSON(Error{}),
+			// 	),
+			// NewPath("/requests/{id}/thing").Post().Tags("thing").OperationID("CreateOneThing").
+			// 	Parameter(Parameter{In: "path", Format: "uuid", Type: "string", Required: true, Name: "id"}).
+			// 	Parameter(Parameter{In: "query", Name: "type", Ref: MyEnum{}}).
+			// 	Parameter(Parameter{In: "query", Name: "toto", Ref: []uuid.UUID{}}).
+			// 	FormData(MyBody{}).
+			// 	Responses(
+			// 		NewResponse(200).Description("OK").JSON(MyResponse{}),
+			// 		NewResponse(500).Description("ERROR").JSON(Error{}),
+			// 	),
 		)
 
 	buffer := bytes.NewBuffer(nil)

@@ -354,8 +354,15 @@ func (d *Document) Build() error {
 	if d.t.Paths == nil {
 		d.t.Paths = openapi3.NewPaths()
 	}
+
+	type OperationToRegister struct {
+		method    string
+		operation *openapi3.Operation
+	}
+
+	operationsToRegister := map[string][]OperationToRegister{}
+
 	for _, path := range d.paths {
-		pathItem := &openapi3.PathItem{}
 		responses := openapi3.NewResponses()
 
 		if d.t.Components.Schemas == nil {
@@ -402,12 +409,17 @@ func (d *Document) Build() error {
 			}
 		}
 
-		err := setPathItemOperation(path.method, pathItem, operation)
-		if err != nil {
-			return err
-		}
-		d.t.Paths.Set(path.path, pathItem)
+		operationsToRegister[path.path] = append(operationsToRegister[path.path], OperationToRegister{method: path.method, operation: operation})
 
+	}
+	for path, operations := range operationsToRegister {
+		fmt.Println(path, len(operations))
+		newPathItem := new(openapi3.PathItem)
+		for _, operation := range operations {
+			setPathItemOperation(operation.method, newPathItem, operation.operation)
+		}
+
+		d.t.Paths.Set(path, newPathItem)
 	}
 	return nil
 	// returns a map
