@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -197,7 +198,15 @@ func Properties(object any) ([]Property, []*Schema) {
 				property.deprecated = true
 			}
 			if value, ok := tagFieldLookUp(tagValues, "default"); ok {
-				property._default = value
+				if bool, err := strconv.ParseBool(value); err == nil {
+					property._default = bool
+				} else if val, err := strconv.ParseInt(value, 10, 64); err == nil {
+					property._default = val
+				} else if val, err := strconv.ParseFloat(value, 64); err == nil {
+					property._default = val
+				} else {
+					property._default = value
+				}
 			}
 			if slices.Contains(tagValues, "required:true") {
 				property.required = true
