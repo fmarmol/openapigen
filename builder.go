@@ -413,7 +413,6 @@ func (d *Document) Build() error {
 
 	}
 	for path, operations := range operationsToRegister {
-		fmt.Println(path, len(operations))
 		newPathItem := new(openapi3.PathItem)
 		for _, operation := range operations {
 			setPathItemOperation(operation.method, newPathItem, operation.operation)
