@@ -281,6 +281,11 @@ func (r *Response) Description(s string) *Response {
 	return r
 }
 
+type Tag struct {
+	Name        string
+	Description string
+}
+
 type Document struct {
 	t          *openapi3.T
 	paths      []*Path
@@ -288,6 +293,12 @@ type Document struct {
 	Title      string
 	servers    []string
 	bearerAuth bool // only support bearer JWT for now
+	tags       []Tag
+}
+
+func (d *Document) Tags(tags ...Tag) *Document {
+	d.tags = append(d.tags, tags...)
+	return d
 }
 
 func (d *Document) BearerAuth() *Document {
@@ -371,6 +382,9 @@ func (d *Document) Build() error {
 				}}
 		}
 
+	}
+	for _, t := range d.tags {
+		d.t.Tags = append(d.t.Tags, &openapi3.Tag{Name: t.Name, Description: t.Description})
 	}
 	if d.t.Paths == nil {
 		d.t.Paths = openapi3.NewPaths()

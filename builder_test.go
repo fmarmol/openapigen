@@ -47,6 +47,7 @@ type Persons []Person
 
 func TestBuilder(t *testing.T) {
 	doc := &Document{Version: "0.0.1", Title: "awesome api"}
+	doc.Tags(Tag{Name: "one", Description: "one des"}, Tag{Name: "two", Description: "two"})
 	doc.Server("/api").Server("/api/v3").BearerAuth().
 		Paths(
 			NewPath("/batches/").Get().OperationID("listBatches").
