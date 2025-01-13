@@ -17,19 +17,20 @@ type Parameter struct {
 }
 
 type Path struct {
-	path            string
-	method          string
-	tags            []string
-	summary         string
-	description     string
-	operationID     string
-	parameters      []*openapi3.ParameterRef
-	responses       []*Response
-	apiResponses    map[string]*openapi3.ResponseRef
-	apiSchemas      map[string]*openapi3.SchemaRef
-	jsonBody        *Schema
-	formData        *Schema
-	defaultResponse *Response
+	path                string
+	method              string
+	tags                []string
+	summary             string
+	description         string
+	operationID         string
+	parameters          []*openapi3.ParameterRef
+	responses           []*Response
+	apiResponses        map[string]*openapi3.ResponseRef
+	apiSchemas          map[string]*openapi3.SchemaRef
+	jsonBody            *Schema
+	formData            *Schema
+	defaultResponse     *Response
+	jsonBodyNotRequired bool
 }
 
 func NewPath(path string) *Path {
@@ -59,8 +60,13 @@ func NewPath(path string) *Path {
 	return p
 }
 
-func (p *Path) JSONBody(obj any) *Path {
+func (p *Path) JSONBody(obj any, notRequired ...bool) *Path {
 	p.jsonBody = NewSchema(obj)
+
+	if len(notRequired) > 0 && notRequired[0] {
+		p.jsonBodyNotRequired = true
+	}
+
 	p.registerSchema(p.jsonBody)
 	return p
 }
@@ -195,7 +201,7 @@ func (p *Path) Responses(rs ...*Response) *Path {
 	return p
 }
 
-func (p *Path) registerSchema(s *Schema) {
+func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 	value := openapi3.NewObjectSchema()
 
 	if s.enums != nil {

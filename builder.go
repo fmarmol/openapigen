@@ -436,6 +436,7 @@ func (d *Document) Build() error {
 		if path.jsonBody != nil {
 			operation.RequestBody = &openapi3.RequestBodyRef{
 				Value: &openapi3.RequestBody{
+					Required: !path.jsonBodyNotRequired,
 					Content: openapi3.Content{
 						"application/json": &openapi3.MediaType{
 							Schema: &openapi3.SchemaRef{
