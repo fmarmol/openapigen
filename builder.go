@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fmarmol/kin-openapi/openapi3"
 	"github.com/fmarmol/openapigen/utils"
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 )
@@ -436,7 +436,7 @@ func (d *Document) Build() error {
 		if path.jsonBody != nil {
 			operation.RequestBody = &openapi3.RequestBodyRef{
 				Value: &openapi3.RequestBody{
-					Required: !path.jsonBodyNotRequired,
+					Required: path.jsonBodyRequired,
 					Content: openapi3.Content{
 						"application/json": &openapi3.MediaType{
 							Schema: &openapi3.SchemaRef{

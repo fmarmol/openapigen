@@ -3,7 +3,7 @@ package openapigen
 import (
 	"fmt"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/fmarmol/kin-openapi/openapi3"
 )
 
 type Parameter struct {
@@ -17,20 +17,20 @@ type Parameter struct {
 }
 
 type Path struct {
-	path                string
-	method              string
-	tags                []string
-	summary             string
-	description         string
-	operationID         string
-	parameters          []*openapi3.ParameterRef
-	responses           []*Response
-	apiResponses        map[string]*openapi3.ResponseRef
-	apiSchemas          map[string]*openapi3.SchemaRef
-	jsonBody            *Schema
-	formData            *Schema
-	defaultResponse     *Response
-	jsonBodyNotRequired bool
+	path             string
+	method           string
+	tags             []string
+	summary          string
+	description      string
+	operationID      string
+	parameters       []*openapi3.ParameterRef
+	responses        []*Response
+	apiResponses     map[string]*openapi3.ResponseRef
+	apiSchemas       map[string]*openapi3.SchemaRef
+	jsonBody         *Schema
+	formData         *Schema
+	defaultResponse  *Response
+	jsonBodyRequired bool
 }
 
 func NewPath(path string) *Path {
@@ -60,11 +60,11 @@ func NewPath(path string) *Path {
 	return p
 }
 
-func (p *Path) JSONBody(obj any, notRequired ...bool) *Path {
+func (p *Path) JSONBody(obj any, required ...bool) *Path {
 	p.jsonBody = NewSchema(obj)
 
-	if len(notRequired) > 0 && notRequired[0] {
-		p.jsonBodyNotRequired = true
+	if len(required) > 0 && required[0] {
+		p.jsonBodyRequired = true
 	}
 
 	p.registerSchema(p.jsonBody)

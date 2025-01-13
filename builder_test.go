@@ -53,15 +53,15 @@ func TestBuilder(t *testing.T) {
 	doc.Server("/api").Server("/api/v3").BearerAuth().
 		Paths(
 			NewPath("/batches/").Delete().OperationID("listBatches").Summary("delete a batch").
-				JSONBody(Person{}, true).
+				JSONBody(Person{}).
 				Responses(
 					NewResponse(204).Description("OK"),
 					// NewResponse(-1).JSON(Person{}).Description("DEFAULT"),
 				),
-			NewPath("/batches/").Post().OperationID("createBatches").
-				Responses(
-					NewResponse(200).Description("OK"),
-				),
+			// NewPath("/batches/").Post().OperationID("createBatches").
+			// 	Responses(
+			// 		NewResponse(200).Description("OK"),
+			// 	),
 			// NewPath("/request/things").Get().Tags("things").OperationID("GetThings").
 			// 	Response(
 			// 		NewResponse(200).Description("OK").JSON(Persons{}),
