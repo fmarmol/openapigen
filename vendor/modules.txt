@@ -1,9 +1,11 @@
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
+# github.com/fmarmol/kin-openapi v0.0.0-20250113130108-be8613b23ec2
+## explicit; go 1.22.5
+github.com/fmarmol/kin-openapi/openapi3
 # github.com/getkin/kin-openapi v0.128.0
 ## explicit; go 1.20
-github.com/getkin/kin-openapi/openapi3
 # github.com/go-openapi/jsonpointer v0.21.0
 ## explicit; go 1.20
 github.com/go-openapi/jsonpointer
@@ -13,9 +15,6 @@ github.com/go-openapi/swag
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid
-# github.com/invopop/yaml v0.3.1
-## explicit; go 1.14
-github.com/invopop/yaml
 # github.com/josharian/intern v1.0.0
 ## explicit; go 1.5
 github.com/josharian/intern
@@ -27,6 +26,12 @@ github.com/mailru/easyjson/jwriter
 # github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 ## explicit
 github.com/mohae/deepcopy
+# github.com/oasdiff/yaml v0.0.0-20241210131133-6b86fb107d80
+## explicit; go 1.22.5
+github.com/oasdiff/yaml
+# github.com/oasdiff/yaml3 v0.0.0-20241210130736-a94c01f36349
+## explicit; go 1.22.5
+github.com/oasdiff/yaml3
 # github.com/perimeterx/marshmallow v1.1.5
 ## explicit; go 1.17
 github.com/perimeterx/marshmallow
