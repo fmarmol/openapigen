@@ -40,6 +40,7 @@ type Property struct {
 	_default    any
 	minimum     *float64
 	maximum     *float64
+	enums       []any
 }
 
 type Schema struct {
