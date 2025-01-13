@@ -265,12 +265,18 @@ func (p *Path) registerSchema(s *Schema) {
 
 func (p *Path) Response(r *Response) *Path {
 	p.responses = append(p.responses, r)
-	if r.json == nil {
-		return p
-	}
 	codeStr := fmt.Sprint(r.code)
 	if r.code == -1 {
 		codeStr = "default"
+	}
+
+	if r.json == nil {
+		p.apiResponses[codeStr] = &openapi3.ResponseRef{
+			Value: &openapi3.Response{
+				Description: &r.description,
+			},
+		}
+		return p
 	}
 
 	p.apiResponses[codeStr] = &openapi3.ResponseRef{

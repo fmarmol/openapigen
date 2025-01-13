@@ -50,10 +50,10 @@ func TestBuilder(t *testing.T) {
 	doc.Tags(Tag{Name: "one", Description: "one des"}, Tag{Name: "two", Description: "two"})
 	doc.Server("/api").Server("/api/v3").BearerAuth().
 		Paths(
-			NewPath("/batches/").Get().OperationID("listBatches").
+			NewPath("/batches/").Delete().OperationID("listBatches").
 				Responses(
-					NewResponse(200).JSON(Person{}).Description("OK"),
-					NewResponse(-1).JSON(Person{}).Description("DEFAULT"),
+					NewResponse(204).Description("OK"),
+					// NewResponse(-1).JSON(Person{}).Description("DEFAULT"),
 				),
 			NewPath("/batches/").Post().OperationID("createBatches").
 				Responses(
