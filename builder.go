@@ -287,13 +287,19 @@ type Tag struct {
 }
 
 type Document struct {
-	t          *openapi3.T
-	paths      []*Path
-	Version    string
-	Title      string
-	servers    []string
-	bearerAuth bool // only support bearer JWT for now
-	tags       []Tag
+	t               *openapi3.T
+	paths           []*Path
+	Version         string
+	Title           string
+	servers         []string
+	bearerAuth      bool // only support bearer JWT for now
+	tags            []Tag
+	defaultResponse *Response
+}
+
+func (d *Document) SetDefaultResponse(r *Response) *Document {
+	d.defaultResponse = r
+	return d
 }
 
 func (d *Document) Tags(tags ...Tag) *Document {
@@ -307,6 +313,7 @@ func (d *Document) BearerAuth() *Document {
 }
 
 func (d *Document) Path(p *Path) *Document {
+	p.defaultResponse = d.defaultResponse
 	d.paths = append(d.paths, p)
 	return d
 }
@@ -398,6 +405,7 @@ func (d *Document) Build() error {
 	operationsToRegister := map[string][]OperationToRegister{}
 
 	for _, path := range d.paths {
+		path.SetDefaultResponse() // TODO try to find a better place to set
 		responses := openapi3.NewResponses()
 
 		if d.t.Components.Schemas == nil {
@@ -405,6 +413,9 @@ func (d *Document) Build() error {
 		}
 		for code, r := range path.apiResponses {
 			responses.Set(code, r)
+			// if d.globalDefaultResponse != nil {
+			// 	responses.Set("default", )
+			// }
 		}
 		for name, schema := range path.apiSchemas {
 			d.t.Components.Schemas[name] = schema

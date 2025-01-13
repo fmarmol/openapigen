@@ -16,17 +16,18 @@ type Parameter struct {
 }
 
 type Path struct {
-	path         string
-	method       string
-	tags         []string
-	summary      string
-	operationID  string
-	parameters   []*openapi3.ParameterRef
-	responses    []*Response
-	apiResponses map[string]*openapi3.ResponseRef
-	apiSchemas   map[string]*openapi3.SchemaRef
-	jsonBody     *Schema
-	formData     *Schema
+	path            string
+	method          string
+	tags            []string
+	summary         string
+	operationID     string
+	parameters      []*openapi3.ParameterRef
+	responses       []*Response
+	apiResponses    map[string]*openapi3.ResponseRef
+	apiSchemas      map[string]*openapi3.SchemaRef
+	jsonBody        *Schema
+	formData        *Schema
+	defaultResponse *Response
 }
 
 func NewPath(path string) *Path {
@@ -263,7 +264,30 @@ func (p *Path) registerSchema(s *Schema) {
 
 }
 
+// after initial build
+func (p *Path) SetDefaultResponse() {
+	if p.defaultResponse != nil {
+		p.apiResponses["default"] = &openapi3.ResponseRef{
+			Value: &openapi3.Response{
+				Description: &p.defaultResponse.description,
+			},
+		}
+		if p.defaultResponse.json != nil {
+
+			p.apiResponses["default"].Value.Content = openapi3.Content{
+				"application/json": &openapi3.MediaType{
+					Schema: &openapi3.SchemaRef{
+						Ref: p.defaultResponse.json.RefPath(),
+					},
+				},
+			}
+			p.registerSchema(p.defaultResponse.json)
+		}
+	}
+}
+
 func (p *Path) Response(r *Response) *Path {
+
 	p.responses = append(p.responses, r)
 	codeStr := fmt.Sprint(r.code)
 	if r.code == -1 {
@@ -276,21 +300,21 @@ func (p *Path) Response(r *Response) *Path {
 				Description: &r.description,
 			},
 		}
-		return p
-	}
-
-	p.apiResponses[codeStr] = &openapi3.ResponseRef{
-		Value: &openapi3.Response{
-			Description: &r.description,
-			Content: openapi3.Content{
-				"application/json": &openapi3.MediaType{
-					Schema: &openapi3.SchemaRef{
-						Ref: r.json.RefPath(),
+	} else {
+		p.apiResponses[codeStr] = &openapi3.ResponseRef{
+			Value: &openapi3.Response{
+				Description: &r.description,
+				Content: openapi3.Content{
+					"application/json": &openapi3.MediaType{
+						Schema: &openapi3.SchemaRef{
+							Ref: r.json.RefPath(),
+						},
 					},
 				},
 			},
-		},
+		}
+		p.registerSchema(r.json)
+
 	}
-	p.registerSchema(r.json)
 	return p
 }
