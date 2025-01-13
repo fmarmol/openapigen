@@ -20,6 +20,7 @@ type Path struct {
 	method          string
 	tags            []string
 	summary         string
+	description     string
 	operationID     string
 	parameters      []*openapi3.ParameterRef
 	responses       []*Response
@@ -169,6 +170,12 @@ func (p *Path) Summary(s string) *Path {
 	p.summary = s
 	return p
 }
+
+func (p *Path) Description(s string) *Path {
+	p.description = s
+	return p
+}
+
 func (p *Path) OperationID(o string) *Path {
 	p.operationID = o
 	return p

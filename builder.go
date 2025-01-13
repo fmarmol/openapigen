@@ -424,9 +424,13 @@ func (d *Document) Build() error {
 		operation := &openapi3.Operation{
 			Tags:        path.tags,
 			Summary:     path.summary,
+			Description: path.description,
 			OperationID: path.operationID,
 			Responses:   responses,
 			Parameters:  path.parameters,
+		}
+		if path.description == "" {
+			operation.Description = path.summary
 		}
 		if path.jsonBody != nil {
 			operation.RequestBody = &openapi3.RequestBodyRef{
