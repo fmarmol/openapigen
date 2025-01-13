@@ -13,6 +13,7 @@ type Parameter struct {
 	Format   string
 	Required bool
 	Ref      any
+	Enums    Enum
 }
 
 type Path struct {
@@ -87,6 +88,7 @@ func (p *Path) Parameter(param Parameter) *Path {
 								Value: &openapi3.Schema{
 									Type:   &openapi3.Types{prop._type},
 									Format: prop.format,
+									Enum:   prop.enums,
 								},
 							},
 						},
@@ -112,17 +114,22 @@ func (p *Path) Parameter(param Parameter) *Path {
 	}
 	_type := &openapi3.Types{param.Type}
 
+	schema := &openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			Type:   _type,
+			Format: param.Format,
+		},
+	}
+	if param.Enums != nil {
+		schema.Value.Enum = param.Enums.Values()
+	}
+
 	p.parameters = append(p.parameters, &openapi3.ParameterRef{
 		Value: &openapi3.Parameter{
 			In:       param.In,
 			Name:     param.Name,
 			Required: param.Required,
-			Schema: &openapi3.SchemaRef{
-				Value: &openapi3.Schema{
-					Type:   _type,
-					Format: param.Format,
-				},
-			},
+			Schema:   schema,
 		},
 	})
 	return p
@@ -228,6 +235,7 @@ func (p *Path) registerSchema(s *Schema) {
 							Default:     property._default,
 							Min:         property.minimum,
 							Max:         property.maximum,
+							Enum:        property.enums,
 						},
 					},
 				},
@@ -260,6 +268,7 @@ func (p *Path) registerSchema(s *Schema) {
 					Default:     property._default,
 					Min:         property.minimum,
 					Max:         property.maximum,
+					Enum:        property.enums,
 				},
 			}
 		}
