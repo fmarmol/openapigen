@@ -242,6 +242,7 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 							Min:         property.minimum,
 							Max:         property.maximum,
 							Enum:        property.enums,
+							Nullable:    property.nullable,
 						},
 					},
 				},
@@ -275,6 +276,7 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 					Min:         property.minimum,
 					Max:         property.maximum,
 					Enum:        property.enums,
+					Nullable:    property.nullable,
 				},
 			}
 		}

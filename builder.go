@@ -38,6 +38,7 @@ type Property struct {
 	description string
 	deprecated  bool
 	_default    any
+	nullable    bool
 	minimum     *float64
 	maximum     *float64
 	enums       []any
@@ -215,6 +216,9 @@ func Properties(object any) ([]Property, []*Schema) {
 			}
 			if slices.Contains(tagValues, "required:true") {
 				property.required = true
+			}
+			if slices.Contains(tagValues, "nullable:true") {
+				property.nullable = true
 			}
 
 		}
