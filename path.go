@@ -1,6 +1,7 @@
 package openapigen
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/fmarmol/kin-openapi/openapi3"
@@ -321,28 +322,40 @@ func (p *Path) Response(r *Response) *Path {
 	if r.code == -1 {
 		codeStr = "default"
 	}
-
-	if r.ref == nil {
-		p.apiResponses[codeStr] = &openapi3.ResponseRef{
-			Value: &openapi3.Response{
-				Description: &r.description,
-			},
+	if r.inline != nil {
+		var openapiResp openapi3.Response
+		err := json.Unmarshal(r.inline, &openapiResp)
+		if err != nil {
+			panic(err)
 		}
-	} else {
 		p.apiResponses[codeStr] = &openapi3.ResponseRef{
-			Value: &openapi3.Response{
-				Description: &r.description,
-				Content: openapi3.Content{
-					r.content: &openapi3.MediaType{
-						Schema: &openapi3.SchemaRef{
-							Ref: r.ref.RefPath(),
+			Value: &openapiResp,
+		}
+
+	} else {
+
+		if r.ref == nil {
+			p.apiResponses[codeStr] = &openapi3.ResponseRef{
+				Value: &openapi3.Response{
+					Description: &r.description,
+				},
+			}
+		} else {
+			p.apiResponses[codeStr] = &openapi3.ResponseRef{
+				Value: &openapi3.Response{
+					Description: &r.description,
+					Content: openapi3.Content{
+						r.content: &openapi3.MediaType{
+							Schema: &openapi3.SchemaRef{
+								Ref: r.ref.RefPath(),
+							},
 						},
 					},
 				},
-			},
-		}
-		p.registerSchema(r.ref)
+			}
+			p.registerSchema(r.ref)
 
+		}
 	}
 	return p
 }

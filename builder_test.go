@@ -56,6 +56,18 @@ func TestBuilder(t *testing.T) {
 				Content(Person{}, "image/*", true).
 				Responses(
 					NewResponse(204).Content("toto/titi", Person{}).Description("OK"),
+					NewResponse(203).Inline(map[string]any{
+						"description": "OK",
+						"content": map[string]any{
+							"image/*": map[string]any{
+								"schema": map[string]any{
+									"type":   "string",
+									"format": "binary",
+								},
+							},
+						},
+					},
+					).Description("OK"),
 					// NewResponse(-1).JSON(Person{}).Description("DEFAULT"),
 				),
 			// NewPath("/batches/").Post().OperationID("createBatches").

@@ -1,6 +1,7 @@
 package openapigen
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"reflect"
@@ -269,11 +270,21 @@ type Response struct {
 	description string
 	ref         *Schema
 	content     string
+	inline      []byte // WARNING: this only a temp fix to have a custom request body inline, openapi3.Response (only json) (not a ref)
 }
 
 func NewResponse(code int) *Response {
 	r := new(Response)
 	r.code = code
+	return r
+}
+
+func (r *Response) Inline(data map[string]any) *Response {
+	raw, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+	r.inline = raw
 	return r
 }
 
