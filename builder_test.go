@@ -55,7 +55,7 @@ func TestBuilder(t *testing.T) {
 			NewPath("/batches/").Delete().OperationID("listBatches").Summary("delete a batch").
 				JSONBody(Person{}).
 				Responses(
-					NewResponse(204).Description("OK"),
+					NewResponse(204).Content("toto/titi", Person{}).Description("OK"),
 					// NewResponse(-1).JSON(Person{}).Description("DEFAULT"),
 				),
 			// NewPath("/batches/").Post().OperationID("createBatches").

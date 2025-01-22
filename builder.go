@@ -267,7 +267,8 @@ func NewSchema(ref any) *Schema {
 type Response struct {
 	code        int // -1 for default
 	description string
-	json        *Schema
+	ref         *Schema
+	content     string
 }
 
 func NewResponse(code int) *Response {
@@ -276,8 +277,15 @@ func NewResponse(code int) *Response {
 	return r
 }
 
+func (r *Response) Content(s string, obj any) *Response {
+	r.content = s
+	r.ref = NewSchema(obj)
+	return r
+}
+
 func (r *Response) JSON(object any) *Response {
-	r.json = NewSchema(object)
+	r.content = "application/json"
+	r.ref = NewSchema(object)
 	return r
 }
 

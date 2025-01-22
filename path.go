@@ -296,16 +296,16 @@ func (p *Path) SetDefaultResponse() {
 				Description: &p.defaultResponse.description,
 			},
 		}
-		if p.defaultResponse.json != nil {
+		if p.defaultResponse.ref != nil {
 
 			p.apiResponses["default"].Value.Content = openapi3.Content{
 				"application/json": &openapi3.MediaType{
 					Schema: &openapi3.SchemaRef{
-						Ref: p.defaultResponse.json.RefPath(),
+						Ref: p.defaultResponse.ref.RefPath(),
 					},
 				},
 			}
-			p.registerSchema(p.defaultResponse.json)
+			p.registerSchema(p.defaultResponse.ref)
 		}
 	}
 }
@@ -318,7 +318,7 @@ func (p *Path) Response(r *Response) *Path {
 		codeStr = "default"
 	}
 
-	if r.json == nil {
+	if r.ref == nil {
 		p.apiResponses[codeStr] = &openapi3.ResponseRef{
 			Value: &openapi3.Response{
 				Description: &r.description,
@@ -329,15 +329,15 @@ func (p *Path) Response(r *Response) *Path {
 			Value: &openapi3.Response{
 				Description: &r.description,
 				Content: openapi3.Content{
-					"application/json": &openapi3.MediaType{
+					r.content: &openapi3.MediaType{
 						Schema: &openapi3.SchemaRef{
-							Ref: r.json.RefPath(),
+							Ref: r.ref.RefPath(),
 						},
 					},
 				},
 			},
 		}
-		p.registerSchema(r.json)
+		p.registerSchema(r.ref)
 
 	}
 	return p
