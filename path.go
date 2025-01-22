@@ -32,6 +32,7 @@ type Path struct {
 	// formData        *Schema
 	content         string
 	ref             *Schema
+	inline          []byte // WARNING: this only a temp fix to have a custom request body inline, openapi3.Response (only json) (not a ref)
 	defaultResponse *Response
 	contentRequired bool
 }
@@ -71,6 +72,15 @@ func (p *Path) Content(obj any, content string, required ...bool) *Path {
 		p.contentRequired = true
 	}
 	p.registerSchema(p.ref)
+	return p
+}
+
+func (p *Path) Inline(data map[string]any) *Path {
+	raw, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+	p.inline = raw
 	return p
 }
 

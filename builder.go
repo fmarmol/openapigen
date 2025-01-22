@@ -270,7 +270,7 @@ type Response struct {
 	description string
 	ref         *Schema
 	content     string
-	inline      []byte // WARNING: this only a temp fix to have a custom request body inline, openapi3.Response (only json) (not a ref)
+	inline      []byte // WARNING: this only a temp fix to have a custom response inline, openapi3.Response (only json) (not a ref)
 }
 
 func NewResponse(code int) *Response {
@@ -455,6 +455,16 @@ func (d *Document) Build() error {
 		}
 		if path.description == "" {
 			operation.Description = path.summary
+		}
+		if path.inline != nil {
+			var openapiReq openapi3.RequestBody
+			err := json.Unmarshal(path.inline, &openapiReq)
+			if err != nil {
+				panic(err)
+			}
+			operation.RequestBody = &openapi3.RequestBodyRef{
+				Value: &openapiReq,
+			}
 		}
 		if path.ref != nil {
 			operation.RequestBody = &openapi3.RequestBodyRef{

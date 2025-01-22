@@ -53,7 +53,19 @@ func TestBuilder(t *testing.T) {
 	doc.Server("/api").Server("/api/v3").BearerAuth().
 		Paths(
 			NewPath("/batches/").Delete().OperationID("listBatches").Summary("delete a batch").
-				Content(Person{}, "image/*", true).
+				// Content(Person{}, "image/*", true).
+				Inline(map[string]any{
+					"description": "OK",
+					"content": map[string]any{
+						"image/*": map[string]any{
+							"schema": map[string]any{
+								"type":   "string",
+								"format": "binary",
+							},
+						},
+					},
+				},
+				).
 				Responses(
 					NewResponse(204).Content("toto/titi", Person{}).Description("OK"),
 					NewResponse(203).Inline(map[string]any{
