@@ -445,27 +445,14 @@ func (d *Document) Build() error {
 		if path.description == "" {
 			operation.Description = path.summary
 		}
-		if path.jsonBody != nil {
+		if path.ref != nil {
 			operation.RequestBody = &openapi3.RequestBodyRef{
 				Value: &openapi3.RequestBody{
-					Required: path.jsonBodyRequired,
+					Required: path.contentRequired,
 					Content: openapi3.Content{
-						"application/json": &openapi3.MediaType{
+						path.content: &openapi3.MediaType{
 							Schema: &openapi3.SchemaRef{
-								Ref: path.jsonBody.RefPath(),
-							},
-						},
-					},
-				},
-			}
-		}
-		if path.formData != nil {
-			operation.RequestBody = &openapi3.RequestBodyRef{
-				Value: &openapi3.RequestBody{
-					Content: openapi3.Content{
-						"multipart/form-data": &openapi3.MediaType{
-							Schema: &openapi3.SchemaRef{
-								Ref: path.formData.RefPath(),
+								Ref: path.ref.RefPath(),
 							},
 						},
 					},

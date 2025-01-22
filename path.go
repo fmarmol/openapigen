@@ -17,20 +17,22 @@ type Parameter struct {
 }
 
 type Path struct {
-	path             string
-	method           string
-	tags             []string
-	summary          string
-	description      string
-	operationID      string
-	parameters       []*openapi3.ParameterRef
-	responses        []*Response
-	apiResponses     map[string]*openapi3.ResponseRef
-	apiSchemas       map[string]*openapi3.SchemaRef
-	jsonBody         *Schema
-	formData         *Schema
-	defaultResponse  *Response
-	jsonBodyRequired bool
+	path         string
+	method       string
+	tags         []string
+	summary      string
+	description  string
+	operationID  string
+	parameters   []*openapi3.ParameterRef
+	responses    []*Response
+	apiResponses map[string]*openapi3.ResponseRef
+	apiSchemas   map[string]*openapi3.SchemaRef
+	// jsonBody        *Schema
+	// formData        *Schema
+	content         string
+	ref             *Schema
+	defaultResponse *Response
+	contentRequired bool
 }
 
 func NewPath(path string) *Path {
@@ -60,21 +62,23 @@ func NewPath(path string) *Path {
 	return p
 }
 
-func (p *Path) JSONBody(obj any, required ...bool) *Path {
-	p.jsonBody = NewSchema(obj)
+func (p *Path) Content(obj any, content string, required ...bool) *Path {
+	p.ref = NewSchema(obj)
+	p.content = content
 
 	if len(required) > 0 && required[0] {
-		p.jsonBodyRequired = true
+		p.contentRequired = true
 	}
-
-	p.registerSchema(p.jsonBody)
+	p.registerSchema(p.ref)
 	return p
 }
 
-func (p *Path) FormData(obj any) *Path {
-	p.formData = NewSchema(obj)
-	p.registerSchema(p.formData)
-	return p
+func (p *Path) JSONBody(obj any, required ...bool) *Path {
+	return p.Content(obj, "application/json", required...)
+}
+
+func (p *Path) FormData(obj any, required ...bool) *Path {
+	return p.Content(obj, "multipart/form-data", required...)
 }
 
 func (p *Path) Parameter(param Parameter) *Path {
