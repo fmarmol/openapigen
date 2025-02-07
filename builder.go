@@ -18,6 +18,7 @@ import (
 )
 
 var _enumImpl = reflect.TypeOf((*Enum)(nil)).Elem()
+var _extensionsImpl = reflect.TypeOf((*ExtensionsI)(nil)).Elem()
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
@@ -43,6 +44,7 @@ type Property struct {
 	minimum     *float64
 	maximum     *float64
 	enums       []any
+	extensions  map[string]any
 }
 
 type Schema struct {
@@ -152,6 +154,25 @@ func Properties(object any) ([]Property, []*Schema) {
 		panic(fmt.Errorf("object %v is not a struct", _type.Name()))
 	}
 
+	// Extensions
+	var extensions map[FieldName]Extensions
+	if _type.Implements(_extensionsImpl) {
+		method, ok := _type.MethodByName("Extensions")
+		if !ok {
+			panic("not an extension")
+		}
+		dst := reflect.New(_type).Elem()
+		values := method.Func.Call([]reflect.Value{dst})
+		if len(values) != 1 {
+			panic("Values() method should return a map, 0 found")
+		}
+		_extensions, ok := values[0].Interface().(map[string]map[string]any)
+		if !ok {
+			panic("extensions type cannot be converted into map[string]map[string]any")
+		}
+		extensions = _extensions
+	}
+
 	// Enum in parameter
 	if _type.Implements(_enumImpl) {
 		method, ok := _type.MethodByName("Values")
@@ -221,7 +242,10 @@ func Properties(object any) ([]Property, []*Schema) {
 			if slices.Contains(tagValues, "nullable:true") {
 				property.nullable = true
 			}
-
+		}
+		exts, ok := extensions[field.Name]
+		if ok {
+			property.extensions = exts
 		}
 
 		if field.Type.Implements(_enumImpl) {
