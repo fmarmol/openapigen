@@ -3,6 +3,7 @@ package openapigen
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/fmarmol/kin-openapi/openapi3"
 )
@@ -218,6 +219,25 @@ func (p *Path) Responses(rs ...*Response) *Path {
 
 func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 	value := openapi3.NewObjectSchema()
+
+	reflectValue := reflect.ValueOf(s.object)
+
+	if reflectValue.Type().Implements(_selfExtentionsImpl) {
+		method, ok := reflectValue.Type().MethodByName("SelfExtensions")
+		if !ok {
+			panic("no")
+		}
+		dst := reflect.New(reflectValue.Type()).Elem()
+		values := method.Func.Call([]reflect.Value{dst})
+		if len(values) != 1 {
+			panic("Values() method should return a map, 0 found")
+		}
+		_extensions, ok := values[0].Interface().(map[string]any)
+		if !ok {
+			panic("extensions type cannot be converted into map[string]any")
+		}
+		value.Extensions = _extensions
+	}
 
 	if s.enums != nil {
 		value.Enum = s.enums

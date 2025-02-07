@@ -51,6 +51,12 @@ func (p Person) Extensions() map[FieldName]Extensions {
 	}
 }
 
+func (p Person) SelfExtensions() Extensions {
+	return map[string]any{
+		"toto": "tata",
+	}
+}
+
 type Persons []Person
 
 func TestBuilder(t *testing.T) {

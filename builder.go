@@ -19,6 +19,7 @@ import (
 
 var _enumImpl = reflect.TypeOf((*Enum)(nil)).Elem()
 var _extensionsImpl = reflect.TypeOf((*ExtensionsI)(nil)).Elem()
+var _selfExtentionsImpl = reflect.TypeOf((*SelfExtensionsI)(nil)).Elem()
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
