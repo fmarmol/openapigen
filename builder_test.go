@@ -41,6 +41,7 @@ type Person struct {
 	Name      string `oapi:"required:true,deprecated:true"`
 	Addresses []Addr
 	Age       float32 `oapi:"default:12.1,min:1,max:42,nullable:true"`
+	Toto      *int
 }
 
 func (p Person) Extensions() map[FieldName]Extensions {
