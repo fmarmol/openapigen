@@ -1,7 +1,6 @@
 package openapigen
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 
@@ -22,13 +21,13 @@ func isSlice(obj any) (reflect.Type, bool) {
 	return elem, true
 }
 
-func typeToProp(_type reflect.Type) Property {
+func typeToProp(_type reflect.Type) (Property, bool) {
 	var property Property
 	switch {
 	case _type == reflect.TypeOf(uuid.UUID{}):
 		property._type = "string"
 		property.format = "uuid"
-		return property
+		return property, false
 	}
 	kind := _type.Kind()
 
@@ -52,9 +51,9 @@ func typeToProp(_type reflect.Type) Property {
 	case reflect.String:
 		property._type = "string"
 	default:
-		panic(fmt.Errorf("kind %v not supported in kindToProp", kind))
+		return property, true
 	}
-	return property
+	return property, false
 }
 
 func parseString(value string) any {

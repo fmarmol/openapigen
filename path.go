@@ -9,26 +9,35 @@ import (
 )
 
 type Parameter struct {
-	Name     string
-	In       string
-	Type     string
-	Format   string
-	Required bool
-	Ref      any
-	Enums    Enum
+	isComponent   bool
+	componentName string
+	Name          string
+	In            string
+	Type          string
+	Format        string
+	Required      bool
+	Ref           any
+	Enums         Enum
+}
+
+func NewComponentParameter(name string, param Parameter) Parameter {
+	param.isComponent = true
+	param.componentName = name
+	return param
 }
 
 type Path struct {
-	path         string
-	method       string
-	tags         []string
-	summary      string
-	description  string
-	operationID  string
-	parameters   []*openapi3.ParameterRef
-	responses    []*Response
-	apiResponses map[string]*openapi3.ResponseRef
-	apiSchemas   map[string]*openapi3.SchemaRef
+	path                string
+	method              string
+	tags                []string
+	summary             string
+	description         string
+	operationID         string
+	parameters          []*openapi3.ParameterRef
+	responses           []*Response
+	apiResponses        map[string]*openapi3.ResponseRef
+	apiSchemas          map[string]*openapi3.SchemaRef
+	componentParameters map[string]*openapi3.ParameterRef
 	// jsonBody        *Schema
 	// formData        *Schema
 	content         string
@@ -43,6 +52,7 @@ func NewPath(path string) *Path {
 	p.path = path
 	p.apiResponses = make(map[string]*openapi3.ResponseRef)
 	p.apiSchemas = make(map[string]*openapi3.SchemaRef)
+	p.componentParameters = make(map[string]*openapi3.ParameterRef)
 	// //parse path
 
 	// KEEP FOR LATER
@@ -94,66 +104,63 @@ func (p *Path) FormData(obj any, required ...bool) *Path {
 }
 
 func (p *Path) Parameter(param Parameter) *Path {
+	var schemaRef *openapi3.SchemaRef
 
 	if param.Ref != nil {
 		if t, ok := isSlice(param.Ref); ok {
-			prop := typeToProp(t)
-			p.parameters = append(p.parameters, &openapi3.ParameterRef{
-				Value: &openapi3.Parameter{
-					In:       param.In,
-					Name:     param.Name,
-					Required: param.Required,
-					Schema: &openapi3.SchemaRef{
-						Value: &openapi3.Schema{
-							Type: &openapi3.Types{"array"},
-							Items: &openapi3.SchemaRef{
-								Value: &openapi3.Schema{
-									Type:   &openapi3.Types{prop._type},
-									Format: prop.format,
-									Enum:   prop.enums,
-								},
-							},
-						},
+			var itemsSchema *openapi3.SchemaRef
+			prop, isStruct := typeToProp(t)
+			if !isStruct {
+				itemsSchema = &openapi3.SchemaRef{
+					Value: &openapi3.Schema{
+						Type:   &openapi3.Types{prop._type},
+						Format: prop.format,
+						Enum:   prop.enums,
 					},
+				}
+			} else {
+				schema := NewSchema(reflect.Zero(t).Interface())
+				p.registerSchema(schema)
+				itemsSchema = &openapi3.SchemaRef{Ref: schema.RefPath()}
+			}
+			schemaRef = &openapi3.SchemaRef{
+				Value: &openapi3.Schema{
+					Type:  &openapi3.Types{"array"},
+					Items: itemsSchema,
 				},
-			})
-			return p
+			}
+		} else {
+			schema := NewSchema(param.Ref)
+			p.registerSchema(schema)
+			schemaRef = &openapi3.SchemaRef{Ref: schema.RefPath()}
 		}
-
-		schema := NewSchema(param.Ref)
-		p.parameters = append(p.parameters, &openapi3.ParameterRef{
-			Value: &openapi3.Parameter{
-				In:       param.In,
-				Name:     param.Name,
-				Required: param.Required,
-				Schema: &openapi3.SchemaRef{
-					Ref: schema.RefPath(),
-				},
+	} else {
+		schemaRef = &openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				Type:   &openapi3.Types{param.Type},
+				Format: param.Format,
 			},
-		})
-		p.registerSchema(schema)
-		return p
-	}
-	_type := &openapi3.Types{param.Type}
-
-	schema := &openapi3.SchemaRef{
-		Value: &openapi3.Schema{
-			Type:   _type,
-			Format: param.Format,
-		},
-	}
-	if param.Enums != nil {
-		schema.Value.Enum = param.Enums.Values()
+		}
+		if param.Enums != nil {
+			schemaRef.Value.Enum = param.Enums.Values()
+		}
 	}
 
-	p.parameters = append(p.parameters, &openapi3.ParameterRef{
-		Value: &openapi3.Parameter{
-			In:       param.In,
-			Name:     param.Name,
-			Required: param.Required,
-			Schema:   schema,
-		},
-	})
+	paramRef := &openapi3.ParameterRef{}
+	oapiParam := &openapi3.Parameter{
+		In:       param.In,
+		Name:     param.Name,
+		Required: param.Required,
+		Schema:   schemaRef,
+	}
+	if param.isComponent {
+		p.registerParameter(param, oapiParam)
+		paramRef.Ref = param.RefPath()
+	} else {
+		paramRef.Value = oapiParam
+	}
+	p.parameters = append(p.parameters, paramRef)
+
 	return p
 }
 
@@ -262,6 +269,10 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 		if property.required {
 			value.Required = append(value.Required, property.name)
 		}
+		pType := &openapi3.Types{property._type}
+		if property._type == "" {
+			pType = nil
+		}
 
 		if property.items {
 			value.Properties[property.name] = &openapi3.SchemaRef{
@@ -269,7 +280,7 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 					Type: &openapi3.Types{"array"},
 					Items: &openapi3.SchemaRef{
 						Value: &openapi3.Schema{
-							Type:        &openapi3.Types{property._type},
+							Type:        pType,
 							Format:      property.format,
 							Description: property.description,
 							Deprecated:  property.deprecated,
@@ -304,7 +315,7 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 		} else {
 			value.Properties[property.name] = &openapi3.SchemaRef{
 				Value: &openapi3.Schema{
-					Type:        &openapi3.Types{property._type},
+					Type:        pType,
 					Format:      property.format,
 					Description: property.description,
 					Deprecated:  property.deprecated,
@@ -323,6 +334,49 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 		p.registerSchema(s)
 	}
 
+}
+
+func (p *Path) registerParameter(param Parameter, oapiParam *openapi3.Parameter) {
+	value := openapi3.NewObjectSchema()
+
+	properties, _ := Properties(struct {
+		In     string
+		Name   string
+		Schema *openapi3.Schema
+	}{
+		In:     string(param.In),
+		Name:   string(param.Name),
+		Schema: oapiParam.Schema.Value,
+	})
+
+	value.Properties = make(openapi3.Schemas)
+	for _, property := range properties {
+		if property.required {
+			value.Required = append(value.Required, property.name)
+		}
+		pType := &openapi3.Types{property._type}
+		if property._type == "" {
+			pType = nil
+		}
+
+		value.Properties[property.name] = &openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				Type:        pType,
+				Format:      property.format,
+				Description: property.description,
+				Deprecated:  property.deprecated,
+				Default:     property._default,
+				Min:         property.minimum,
+				Max:         property.maximum,
+				Enum:        property.enums,
+				Nullable:    property.nullable,
+				Extensions:  property.extensions,
+			},
+		}
+	}
+	p.componentParameters[param.componentName] = &openapi3.ParameterRef{
+		Value: oapiParam,
+	}
 }
 
 // after initial build
