@@ -56,6 +56,13 @@ type Schema struct {
 	array  bool
 }
 
+func (s *Parameter) RefPath() string {
+	if s.componentName == "" {
+		panic("anonymous struct is not supported yet")
+	}
+	return fmt.Sprintf("#/components/parameters/%s", s.componentName)
+}
+
 func (s *Schema) RefPath() string {
 	if s.ObjectName() == "" {
 		panic("anonymous struct is not supported yet")
@@ -132,7 +139,7 @@ func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) [
 			}
 		}
 	default:
-		panic(fmt.Errorf("kind %v not supported yet", _type.Kind()))
+		// panic(fmt.Errorf("kind %v not supported yet", _type.Kind()))
 	}
 	return newSchemas
 
@@ -423,13 +430,15 @@ func (d *Document) Build() error {
 		servers := utils.Map(d.servers, func(s string) *openapi3.Server {
 			return &openapi3.Server{URL: s}
 		})
-		d.t = &openapi3.T{OpenAPI: "3.0.0", Info: &openapi3.Info{Version: d.Version, Title: d.Title}, Servers: openapi3.Servers(servers)}
+		d.t = &openapi3.T{
+			OpenAPI:    "3.0.0",
+			Info:       &openapi3.Info{Version: d.Version, Title: d.Title},
+			Servers:    openapi3.Servers(servers),
+			Components: &openapi3.Components{},
+		}
 		if d.bearerAuth {
 			d.t.Security = []openapi3.SecurityRequirement{
 				map[string][]string{"bearerAuth": {}},
-			}
-			if d.t.Components == nil {
-				d.t.Components = &openapi3.Components{}
 			}
 			d.t.Components.SecuritySchemes = map[string]*openapi3.SecuritySchemeRef{
 				"bearerAuth": {
@@ -471,6 +480,13 @@ func (d *Document) Build() error {
 		}
 		for name, schema := range path.apiSchemas {
 			d.t.Components.Schemas[name] = schema
+		}
+
+		if d.t.Components.Parameters == nil {
+			d.t.Components.Parameters = make(openapi3.ParametersMap)
+		}
+		for name, param := range path.componentParameters {
+			d.t.Components.Parameters[name] = param
 		}
 
 		operation := &openapi3.Operation{

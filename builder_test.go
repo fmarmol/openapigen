@@ -3,9 +3,11 @@ package openapigen
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -59,6 +61,17 @@ func (p Person) SelfExtensions() Extensions {
 }
 
 type Persons []Person
+
+type OrderBy struct {
+	Field string `oapi:"required:true"`
+	Order string `oapi:"required:true"`
+}
+
+var OrderByQueryParam = NewComponentParameter("orderByQueryParam", Parameter{
+	In:   "query",
+	Name: "order",
+	Ref:  []OrderBy{},
+})
 
 func TestBuilder(t *testing.T) {
 
@@ -126,4 +139,21 @@ func TestBuilder(t *testing.T) {
 	err := doc.Write(buffer, 2)
 	fmt.Println(buffer.String())
 	require.NoError(t, err)
+}
+
+func TestBuilderParameter(t *testing.T) {
+
+	doc := &Document{}
+	doc.
+		Paths(
+			NewPath("/items").Get().
+				Parameter(OrderByQueryParam).
+				Parameter(Parameter{In: "query", Name: "order_2", Ref: []OrderBy{}}),
+		)
+
+	buffer := bytes.NewBuffer(nil)
+	err := doc.Write(buffer, 2)
+	fmt.Println(buffer.String())
+	require.NoError(t, err)
+	assert.Equal(t, testBuilderParameterExpectedSpecs, strings.ReplaceAll(buffer.String(), "\n", ""))
 }
