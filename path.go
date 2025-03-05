@@ -224,7 +224,7 @@ func (p *Path) Responses(rs ...*Response) *Path {
 	return p
 }
 
-func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
+func (p *Path) registerSchema(s *Schema) {
 	value := openapi3.NewObjectSchema()
 
 	reflectValue := reflect.ValueOf(s.object)
@@ -312,6 +312,16 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 		if property.ref != "" {
 			value.Properties[property.name] = &openapi3.SchemaRef{
 				Ref: property.ref,
+			}
+		} else if property.additionalProperties != "" {
+			value.Properties[property.name] = &openapi3.SchemaRef{
+				Value: &openapi3.Schema{
+					AdditionalProperties: openapi3.AdditionalProperties{
+						Schema: &openapi3.SchemaRef{
+							Ref: property.additionalProperties,
+						},
+					},
+				},
 			}
 		} else {
 			value.Properties[property.name] = &openapi3.SchemaRef{
