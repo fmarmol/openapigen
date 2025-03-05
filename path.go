@@ -304,6 +304,7 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 					Items: &openapi3.SchemaRef{
 						Ref: property.itemsRef,
 					},
+					Extensions: property.extensions,
 				},
 			}
 			continue

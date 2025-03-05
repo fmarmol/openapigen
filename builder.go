@@ -48,6 +48,28 @@ type Property struct {
 	extensions  map[string]any
 }
 
+func (p Property) String() string {
+	data := map[string]any{
+		"name":        p.name,
+		"_type":       p._type,
+		"format":      p.format,
+		"ref":         p.ref,
+		"items":       p.items,
+		"itemsRef":    p.itemsRef,
+		"required":    p.required,
+		"description": p.description,
+		"deprecated":  p.deprecated,
+		"_default":    p._default,
+		"nullable":    p.nullable,
+		"minimum":     p.minimum,
+		"maximum":     p.maximum,
+		"enums":       p.enums,
+		"extensions":  p.extensions,
+	}
+	raw, _ := json.Marshal(data)
+	return string(raw)
+}
+
 type Schema struct {
 	object any
 	owner  *Schema

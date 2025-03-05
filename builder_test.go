@@ -48,7 +48,7 @@ type Person struct {
 
 func (p Person) Extensions() map[FieldName]Extensions {
 	return map[string]map[string]any{
-		"Name": {
+		"Addresses": {
 			"x-go-type": "uuid.UUID",
 		},
 	}
@@ -76,12 +76,13 @@ var OrderByQueryParam = NewComponentParameter("orderByQueryParam", Parameter{
 func TestBuilder(t *testing.T) {
 
 	doc := &Document{Version: "0.0.1", Title: "awesome api"}
-	doc.SetDefaultResponse(NewResponse(-1).JSON(Person{}).Description("default response"))
+	// doc.SetDefaultResponse(NewResponse(-1).JSON(Person{}).Description("default response"))
 	doc.Tags(Tag{Name: "one", Description: "one des"}, Tag{Name: "two", Description: "two"})
 	doc.Server("/api").Server("/api/v3").BearerAuth().
 		Paths(
 			NewPath("/batches/").Delete().OperationID("listBatches").Summary("delete a batch").
-				Content(Person{}, "image/*", true).
+				JSONBody(Person{}).
+				// Content(Person{}, "image/*", true).
 				// Inline(map[string]any{
 				// 	"description": "OK",
 				// 	"content": map[string]any{
@@ -95,7 +96,7 @@ func TestBuilder(t *testing.T) {
 				// },
 				// ).
 				Responses(
-					NewResponse(204).Content("toto/titi", Person{}).Description("OK"),
+					// NewResponse(204).Content("toto/titi", Person{}).Description("OK"),
 					NewResponse(203).Inline(map[string]any{
 						"description": "OK",
 						"content": map[string]any{
