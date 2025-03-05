@@ -453,6 +453,28 @@ func (p *Path) Response(r *Response) *Path {
 			p.registerSchema(r.ref)
 
 		}
+		if r.headers != nil {
+			p.apiResponses[codeStr].Value.Headers = make(openapi3.Headers)
+			for key, prop := range r.headers {
+
+				ptype := openapi3.Types([]string{prop._type})
+				p.apiResponses[codeStr].Value.Headers[key] = &openapi3.HeaderRef{
+					Value: &openapi3.Header{
+						Parameter: openapi3.Parameter{
+							Schema: &openapi3.SchemaRef{
+								Value: &openapi3.Schema{
+									Type:        &ptype,
+									Description: prop.description,
+								},
+							},
+						},
+					},
+					// Ref: schema.RefPath(),
+				}
+				// p.registerSchema(schema)
+
+			}
+		}
 	}
 	return p
 }
