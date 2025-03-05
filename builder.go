@@ -345,11 +345,31 @@ type Response struct {
 	ref         *Schema
 	content     string
 	inline      []byte // WARNING: this only a temp fix to have a custom response inline, openapi3.Response (only json) (not a ref)
+	headers     map[string]*Property
 }
 
 func NewResponse(code int) *Response {
 	r := new(Response)
 	r.code = code
+	return r
+}
+
+// Header support only native types
+// TODO find a better way to set header
+func (r *Response) Header(key string, obj any, description ...string) *Response {
+
+	property := new(Property)
+	newSchemas := []*Schema{}
+	_, _ = setProperty(property, newSchemas, reflect.TypeOf(obj))
+
+	if len(description) > 0 {
+		property.description = description[0]
+	}
+
+	if r.headers == nil {
+		r.headers = make(map[string]*Property)
+	}
+	r.headers[key] = property
 	return r
 }
 

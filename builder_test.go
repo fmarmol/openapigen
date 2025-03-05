@@ -84,6 +84,10 @@ var OrderByQueryParam = NewComponentParameter("orderByQueryParam", Parameter{
 	Ref:  []OrderBy{},
 })
 
+type Header struct {
+	Total int
+}
+
 func TestBuilder(t *testing.T) {
 
 	doc := &Document{Version: "0.0.1", Title: "awesome api"}
@@ -107,21 +111,24 @@ func TestBuilder(t *testing.T) {
 				// },
 				// ).
 				Responses(
-					// NewResponse(204).Content("toto/titi", Person{}).Description("OK"),
-					NewResponse(203).Inline(map[string]any{
-						"description": "OK",
-						"content": map[string]any{
-							"image/*": map[string]any{
-								"schema": map[string]any{
-									"type":   "string",
-									"format": "binary",
-								},
-							},
-						},
-					},
-					).Description("OK"),
-					// NewResponse(-1).JSON(Person{}).Description("DEFAULT"),
+					NewResponse(200).Header("X-toto", 42, "total hits").Description("ok"),
 				),
+			// Responses(
+			// 	// NewResponse(204).Content("toto/titi", Person{}).Description("OK"),
+			// 	NewResponse(203).Inline(map[string]any{
+			// 		"description": "OK",
+			// 		"content": map[string]any{
+			// 			"image/*": map[string]any{
+			// 				"schema": map[string]any{
+			// 					"type":   "string",
+			// 					"format": "binary",
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// 	).Description("OK"),
+			// NewResponse(-1).JSON(Person{}).Description("DEFAULT"),
+			// ),
 			// NewPath("/batches/").Post().OperationID("createBatches").
 			// 	Responses(
 			// 		NewResponse(200).Description("OK"),
