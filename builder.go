@@ -31,21 +31,22 @@ func ToSnakeCase(str string) string {
 }
 
 type Property struct {
-	name        string
-	_type       string
-	format      string
-	ref         string
-	items       bool
-	itemsRef    string
-	required    bool
-	description string
-	deprecated  bool
-	_default    any
-	nullable    bool
-	minimum     *float64
-	maximum     *float64
-	enums       []any
-	extensions  map[string]any
+	name                 string
+	_type                string
+	format               string
+	ref                  string
+	additionalProperties string // ref to add object for the additional properties
+	items                bool
+	itemsRef             string
+	required             bool
+	description          string
+	deprecated           bool
+	_default             any
+	nullable             bool
+	minimum              *float64
+	maximum              *float64
+	enums                []any
+	extensions           map[string]any
 }
 
 func (p Property) String() string {
@@ -116,8 +117,9 @@ func tagFieldLookUp(tags []string, key string) (string, bool) {
 
 }
 
-func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) []*Schema {
+func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) ([]*Schema, *Schema) { // (all schemas, last schema added)
 	kind := _type.Kind()
+	var lastSchema *Schema
 
 	switch kind {
 	case reflect.Pointer:
@@ -143,11 +145,13 @@ func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) [
 	case reflect.Struct:
 		newSchema := NewSchema(reflect.New(_type).Elem().Interface())
 		property.ref = newSchema.RefPath()
+		lastSchema = newSchema
 		newSchemas = append(newSchemas, newSchema)
 	case reflect.Slice:
 		elemType := _type.Elem()
 		if elemType.Kind() == reflect.Struct {
 			newSchema := NewSchema(reflect.New(_type.Elem()).Elem().Interface())
+			lastSchema = newSchema
 			property.itemsRef = newSchema.RefPath()
 			newSchemas = append(newSchemas, newSchema)
 		} else {
@@ -157,13 +161,21 @@ func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) [
 				property._type = "string"
 				property.format = "uuid"
 			default:
-				newSchemas = setProperty(property, newSchemas, elemType)
+				newSchemas, _ = setProperty(property, newSchemas, elemType)
 			}
 		}
+	case reflect.Map:
+		keyType := _type.Key()
+		if keyType != reflect.TypeOf("") {
+			panic("key has to be string")
+		}
+		newSchema := NewSchema(reflect.New(_type.Elem()).Elem().Interface())
+		newSchemas = append(newSchemas, newSchema)
+		property.additionalProperties = newSchema.RefPath()
 	default:
-		// panic(fmt.Errorf("kind %v not supported yet", _type.Kind()))
+		panic(fmt.Errorf("kind %v not supported yet", _type.Kind()))
 	}
-	return newSchemas
+	return newSchemas, lastSchema
 
 }
 
@@ -172,6 +184,11 @@ func Properties(object any) ([]Property, []*Schema) {
 	newSchemas := []*Schema{}
 
 	_type := reflect.TypeOf(object)
+
+	if _type.Kind() == reflect.Pointer {
+		_type = _type.Elem()
+	}
+
 	if _type.Kind() == reflect.Slice {
 		elemType := _type.Elem()
 		if elemType.Kind() == reflect.Struct {
@@ -310,7 +327,7 @@ func Properties(object any) ([]Property, []*Schema) {
 			property._type = "string"
 			property.format = "date-time"
 		default:
-			newSchemas = setProperty(&property, newSchemas, field.Type)
+			newSchemas, _ = setProperty(&property, newSchemas, field.Type)
 		}
 		ret = append(ret, property)
 
