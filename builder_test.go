@@ -35,8 +35,14 @@ type Error struct {
 }
 
 type Addr struct {
-	Street int
+	Street []int
 	City   string
+}
+
+func (Addr) Extensions() map[FieldName]Extensions {
+	return map[string]map[string]any{
+		"Street": {"toto": "tata"},
+	}
 }
 
 type Person struct {
@@ -54,11 +60,11 @@ func (p Person) Extensions() map[FieldName]Extensions {
 	}
 }
 
-func (p Person) SelfExtensions() Extensions {
-	return map[string]any{
-		"toto": "tata",
-	}
-}
+// func (p Person) SelfExtensions() Extensions {
+// 	return map[string]any{
+// 		"toto": "tata",
+// 	}
+// }
 
 type Persons []Person
 

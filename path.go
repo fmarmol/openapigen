@@ -289,9 +289,9 @@ func (p *Path) registerSchema(s *Schema, jsonBodyNotRequired ...bool) {
 							Max:         property.maximum,
 							Enum:        property.enums,
 							Nullable:    property.nullable,
-							Extensions:  property.extensions,
 						},
 					},
+					Extensions: property.extensions, //extensions normally should only concern the parent not the items ?
 				},
 			}
 			continue
