@@ -8,18 +8,6 @@ import (
 	"github.com/fmarmol/kin-openapi/openapi3"
 )
 
-type Parameter struct {
-	isComponent   bool
-	componentName string
-	Name          string
-	In            string
-	Type          string
-	Format        string
-	Required      bool
-	Ref           any
-	Enums         Enum
-}
-
 func NewComponentParameter(name string, param Parameter) Parameter {
 	param.isComponent = true
 	param.componentName = name
@@ -103,11 +91,11 @@ func (p *Path) FormData(obj any, required ...bool) *Path {
 	return p.Content(obj, "multipart/form-data", required...)
 }
 
-func (p *Path) Parameter(param Parameter) *Path {
+func (p *Path) Parameter(param *Parameter) *Path {
 	var schemaRef *openapi3.SchemaRef
 
-	if param.Ref != nil {
-		if t, ok := isSlice(param.Ref); ok {
+	if param.ref != nil {
+		if t, ok := isSlice(param.ref); ok {
 			var itemsSchema *openapi3.SchemaRef
 			prop, isStruct := typeToProp(t)
 			if !isStruct {
@@ -130,27 +118,29 @@ func (p *Path) Parameter(param Parameter) *Path {
 				},
 			}
 		} else {
-			schema := NewSchema(param.Ref)
+			schema := NewSchema(param.ref)
 			p.registerSchema(schema)
 			schemaRef = &openapi3.SchemaRef{Ref: schema.RefPath()}
 		}
 	} else {
 		schemaRef = &openapi3.SchemaRef{
 			Value: &openapi3.Schema{
-				Type:   &openapi3.Types{param.Type},
-				Format: param.Format,
+				Type:   &openapi3.Types{param._type},
+				Format: param.format,
+				Min:    param.min,
+				Max:    param.max,
 			},
 		}
-		if param.Enums != nil {
-			schemaRef.Value.Enum = param.Enums.Values()
+		if param.enums != nil {
+			schemaRef.Value.Enum = param.enums.Values()
 		}
 	}
 
 	paramRef := &openapi3.ParameterRef{}
 	oapiParam := &openapi3.Parameter{
-		In:       param.In,
-		Name:     param.Name,
-		Required: param.Required,
+		In:       string(param.in),
+		Name:     param.name,
+		Required: param.required,
 		Schema:   schemaRef,
 	}
 	if param.isComponent {
@@ -347,7 +337,7 @@ func (p *Path) registerSchema(s *Schema) {
 
 }
 
-func (p *Path) registerParameter(param Parameter, oapiParam *openapi3.Parameter) {
+func (p *Path) registerParameter(param *Parameter, oapiParam *openapi3.Parameter) {
 	value := openapi3.NewObjectSchema()
 
 	properties, _ := Properties(struct {
@@ -355,8 +345,8 @@ func (p *Path) registerParameter(param Parameter, oapiParam *openapi3.Parameter)
 		Name   string
 		Schema *openapi3.Schema
 	}{
-		In:     string(param.In),
-		Name:   string(param.Name),
+		In:     string(param.in),
+		Name:   string(param.name),
 		Schema: oapiParam.Schema.Value,
 	})
 
