@@ -78,11 +78,10 @@ type OrderBy struct {
 	Order string `oapi:"required:true"`
 }
 
-var OrderByQueryParam = NewComponentParameter("orderByQueryParam", Parameter{
-	In:   "query",
-	Name: "order",
-	Ref:  []OrderBy{},
-})
+var OrderByQueryParam = NewParameter("order").
+	InQuery().
+	Ref([]OrderBy{}).
+	AsComponent("orderByQueryParam")
 
 type Header struct {
 	Total int
@@ -96,6 +95,7 @@ func TestBuilder(t *testing.T) {
 	doc.Server("/api").Server("/api/v3").BearerAuth().
 		Paths(
 			NewPath("/batches/").Delete().OperationID("listBatches").Summary("delete a batch").
+				Parameter(NewParameter("toto").InPath().Type("number").Min(1).Max(10)).
 				JSONBody(Person{}).
 				// Content(Person{}, "image/*", true).
 				// Inline(map[string]any{
@@ -167,7 +167,7 @@ func TestBuilderParameter(t *testing.T) {
 		Paths(
 			NewPath("/items").Get().
 				Parameter(OrderByQueryParam).
-				Parameter(Parameter{In: "query", Name: "order_2", Ref: []OrderBy{}}),
+				Parameter(NewParameter("order_2").InQuery().Ref([]OrderBy{})),
 		)
 
 	buffer := bytes.NewBuffer(nil)
