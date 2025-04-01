@@ -259,82 +259,54 @@ func (p *Path) registerSchema(s *Schema) {
 		if property.required {
 			value.Required = append(value.Required, property.name)
 		}
-		pType := &openapi3.Types{property._type}
-		if property._type == "" {
-			pType = nil
-		}
 
-		if property.items {
-			value.Properties[property.name] = &openapi3.SchemaRef{
-				Value: &openapi3.Schema{
-					Type: &openapi3.Types{"array"},
-					Items: &openapi3.SchemaRef{
-						Value: &openapi3.Schema{
-							Type:        pType,
-							Format:      property.format,
-							Description: property.description,
-							Deprecated:  property.deprecated,
-							Default:     property._default,
-							Min:         property.minimum,
-							Max:         property.maximum,
-							Enum:        property.enums,
-							Nullable:    property.nullable,
-						},
-					},
-					Extensions: property.extensions, //extensions normally should only concern the parent not the items ?
-				},
-			}
-			continue
+		value.Properties[property.name] = oapiSchemaFromProperty(&property)
 
-		}
-		if property.itemsRef != "" {
-			value.Properties[property.name] = &openapi3.SchemaRef{
-				Value: &openapi3.Schema{
-					Type: &openapi3.Types{"array"},
-					Items: &openapi3.SchemaRef{
-						Ref: property.itemsRef,
-					},
-					Extensions: property.extensions,
-				},
-			}
-			continue
-		}
-		if property.ref != "" {
-			value.Properties[property.name] = &openapi3.SchemaRef{
-				Ref: property.ref,
-			}
-		} else if property.additionalProperties != "" {
-			value.Properties[property.name] = &openapi3.SchemaRef{
-				Value: &openapi3.Schema{
-					AdditionalProperties: openapi3.AdditionalProperties{
-						Schema: &openapi3.SchemaRef{
-							Ref: property.additionalProperties,
-						},
-					},
-				},
-			}
-		} else {
-			value.Properties[property.name] = &openapi3.SchemaRef{
-				Value: &openapi3.Schema{
-					Type:        pType,
-					Format:      property.format,
-					Description: property.description,
-					Deprecated:  property.deprecated,
-					Default:     property._default,
-					Min:         property.minimum,
-					Max:         property.maximum,
-					Enum:        property.enums,
-					Nullable:    property.nullable,
-					Extensions:  property.extensions,
-				},
-			}
-		}
 	}
 	p.apiSchemas[s.ObjectName()] = openapi3.NewSchemaRef("", value)
 	for _, s := range newSchemas {
 		p.registerSchema(s)
 	}
 
+}
+
+func oapiSchemaFromProperty(property *Property) *openapi3.SchemaRef {
+	if property == nil {
+		return nil
+	}
+
+	if property.ref != "" {
+		return &openapi3.SchemaRef{
+			Ref: property.ref,
+		}
+	}
+
+	var pType *openapi3.Types
+	switch {
+	case property.itemsProp != nil:
+		pType = &openapi3.Types{"array"}
+	case property._type != "":
+		pType = &openapi3.Types{property._type}
+	}
+
+	return &openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			Type:        pType,
+			Format:      property.format,
+			Description: property.description,
+			Deprecated:  property.deprecated,
+			Default:     property._default,
+			Min:         property.minimum,
+			Max:         property.maximum,
+			Enum:        property.enums,
+			Nullable:    property.nullable,
+			Extensions:  property.extensions,
+			Items:       oapiSchemaFromProperty(property.itemsProp),
+			AdditionalProperties: openapi3.AdditionalProperties{
+				Schema: oapiSchemaFromProperty(property.additionalProperties),
+			},
+		},
+	}
 }
 
 func (p *Path) registerParameter(param *Parameter, oapiParam *openapi3.Parameter) {
@@ -355,25 +327,7 @@ func (p *Path) registerParameter(param *Parameter, oapiParam *openapi3.Parameter
 		if property.required {
 			value.Required = append(value.Required, property.name)
 		}
-		pType := &openapi3.Types{property._type}
-		if property._type == "" {
-			pType = nil
-		}
-
-		value.Properties[property.name] = &openapi3.SchemaRef{
-			Value: &openapi3.Schema{
-				Type:        pType,
-				Format:      property.format,
-				Description: property.description,
-				Deprecated:  property.deprecated,
-				Default:     property._default,
-				Min:         property.minimum,
-				Max:         property.maximum,
-				Enum:        property.enums,
-				Nullable:    property.nullable,
-				Extensions:  property.extensions,
-			},
-		}
+		value.Properties[property.name] = oapiSchemaFromProperty(&property)
 	}
 	p.componentParameters[param.componentName] = &openapi3.ParameterRef{
 		Value: oapiParam,

@@ -35,9 +35,8 @@ type Property struct {
 	_type                string
 	format               string
 	ref                  string
-	additionalProperties string // ref to add object for the additional properties
-	items                bool
-	itemsRef             string
+	additionalProperties *Property // ref to add object for the additional properties
+	itemsProp            *Property
 	required             bool
 	description          string
 	deprecated           bool
@@ -51,21 +50,21 @@ type Property struct {
 
 func (p Property) String() string {
 	data := map[string]any{
-		"name":        p.name,
-		"_type":       p._type,
-		"format":      p.format,
-		"ref":         p.ref,
-		"items":       p.items,
-		"itemsRef":    p.itemsRef,
-		"required":    p.required,
-		"description": p.description,
-		"deprecated":  p.deprecated,
-		"_default":    p._default,
-		"nullable":    p.nullable,
-		"minimum":     p.minimum,
-		"maximum":     p.maximum,
-		"enums":       p.enums,
-		"extensions":  p.extensions,
+		"name":                p.name,
+		"_type":               p._type,
+		"format":              p.format,
+		"ref":                 p.ref,
+		"items_props":         p.itemsProp,
+		"addional_properties": p.additionalProperties,
+		"required":            p.required,
+		"description":         p.description,
+		"deprecated":          p.deprecated,
+		"_default":            p._default,
+		"nullable":            p.nullable,
+		"minimum":             p.minimum,
+		"maximum":             p.maximum,
+		"enums":               p.enums,
+		"extensions":          p.extensions,
 	}
 	raw, _ := json.Marshal(data)
 	return string(raw)
@@ -142,6 +141,9 @@ func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) (
 		property._type = "boolean"
 	case reflect.String:
 		property._type = "string"
+	case reflect.TypeOf(uuid.UUID{}).Kind():
+		property._type = "string"
+		property.format = "uuid"
 	case reflect.Struct:
 		newSchema := NewSchema(reflect.New(_type).Elem().Interface())
 		property.ref = newSchema.RefPath()
@@ -149,31 +151,17 @@ func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) (
 		newSchemas = append(newSchemas, newSchema)
 	case reflect.Slice:
 		elemType := _type.Elem()
-		if elemType.Kind() == reflect.Struct {
-			newSchema := NewSchema(reflect.New(_type.Elem()).Elem().Interface())
-			lastSchema = newSchema
-			property.itemsRef = newSchema.RefPath()
-			newSchemas = append(newSchemas, newSchema)
-		} else {
-			property.items = true
-			switch elemType {
-			case reflect.TypeOf(uuid.UUID{}):
-				property._type = "string"
-				property.format = "uuid"
-			default:
-				newSchemas, _ = setProperty(property, newSchemas, elemType)
-			}
-		}
+		property.itemsProp = &Property{}
+		newSchemas, lastSchema = setProperty(property.itemsProp, newSchemas, elemType)
 	case reflect.Map:
 		keyType := _type.Key()
 		if keyType != reflect.TypeOf("") {
 			panic("key has to be string")
 		}
-		newSchema := NewSchema(reflect.New(_type.Elem()).Elem().Interface())
-		newSchemas = append(newSchemas, newSchema)
-		property.additionalProperties = newSchema.RefPath()
+		property.additionalProperties = &Property{}
+		newSchemas, lastSchema = setProperty(property.additionalProperties, newSchemas, reflect.New(_type.Elem()).Elem().Type())
 	default:
-		panic(fmt.Errorf("kind %v not supported yet", _type.Kind()))
+		panic(fmt.Errorf("kind %v not supported yet %v", _type.Kind(), property))
 	}
 	return newSchemas, lastSchema
 
