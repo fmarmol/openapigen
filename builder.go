@@ -97,7 +97,15 @@ func (s *Schema) ObjectName() string {
 		return s.name
 	}
 	_type := reflect.TypeOf(s.object)
-	return _type.Name()
+	name := _type.Name()
+
+	if strings.Contains(name, "[") { // we assume we met a generic type, need to transform the name in something compatible with openapi
+		name = strings.ReplaceAll(name, "[", "_")
+		name = strings.ReplaceAll(name, "]", "_")
+		name = strings.ReplaceAll(name, "/", "_")
+		name = strings.ReplaceAll(name, "*", "_")
+	}
+	return name
 }
 
 func (s *Schema) Properties() ([]Property, []*Schema) {
