@@ -49,11 +49,16 @@ type Kid struct {
 	MyName string
 }
 
+type GenType[T any] struct {
+	Value T
+}
+
 type Person struct {
 	Name      string `oapi:"required:true,deprecated:true"`
 	Addresses []Addr
 	Age       float32 `oapi:"default:12.1,min:1,max:42,nullable:true"`
 	Kids      map[string]Kid
+	GenTest   GenType[Addr]
 	// Kids map[string]string
 }
 
