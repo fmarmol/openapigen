@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -55,6 +56,7 @@ type GenType[T any] struct {
 
 type Person struct {
 	Name      string `oapi:"required:true,deprecated:true"`
+	BirthDate *time.Time
 	Addresses []Addr
 	Age       float32 `oapi:"default:12.1,min:1,max:42,nullable:true"`
 	Kids      map[string]Kid
