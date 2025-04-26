@@ -116,7 +116,7 @@ func TestBuilder(t *testing.T) {
 				// },
 				// ).
 				Responses(
-					NewResponse(200).Header("X-toto", 42, "total hits").Description("ok"),
+					NewResponse(200).Header("X-toto", 42, "total hits").JSON([]Addr{}).Description("ok"),
 				),
 			// Responses(
 			// 	// NewResponse(204).Content("toto/titi", Person{}).Description("OK"),

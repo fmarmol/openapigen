@@ -243,6 +243,8 @@ func (p *Path) registerSchema(s *Schema) {
 		return
 	}
 	if s.array {
+		// fmt.Printf("NEW OBJ: %+#v\n", s.object)
+
 		value.Type = &openapi3.Types{"array"}
 		value.Items = &openapi3.SchemaRef{
 			Ref: s.RefPath(),
