@@ -86,18 +86,22 @@ func (s *Parameter) RefPath() string {
 }
 
 func (s *Schema) RefPath() string {
-	if s.ObjectName() == "" {
+	name := s.ObjectName()
+	if name == "" {
 		panic("anonymous struct is not supported yet")
 	}
 	return fmt.Sprintf("#/components/schemas/%s", s.ObjectName())
 }
 
 func (s *Schema) ObjectName() string {
-	if s.object == nil {
-		return s.name
-	}
 	_type := reflect.TypeOf(s.object)
 	name := _type.Name()
+	if _type.Kind() == reflect.Slice {
+		name = _type.Elem().Name() + "s" // TODO: a better pluralize function
+	}
+	if s.object == nil || s.name != "" {
+		return s.name
+	}
 
 	if strings.Contains(name, "[") { // we assume we met a generic type, need to transform the name in something compatible with openapi
 		name = strings.ReplaceAll(name, "[", "_")
