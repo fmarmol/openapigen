@@ -244,6 +244,10 @@ func Properties(object any) ([]Property, []*Schema) {
 
 	for i := range _type.NumField() {
 		field := _type.Field(i)
+		if field.Type.Kind() == reflect.Pointer {
+			field.Type = reflect.New(field.Type.Elem()).Elem().Type()
+		}
+
 		fieldName := ToSnakeCase(field.Name)
 		if !field.IsExported() {
 			continue
