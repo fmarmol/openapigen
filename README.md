@@ -14,6 +14,9 @@ Use DSL like written in go to build your openapi yaml files.
 - [Response Body description](#response-body)
 - [Fields description](#fields)
 - [Enums](#enums)
+- [Extensions](#extensions)
+- [Additional properties](#additional-properties)
+- [Generics](#generics)
 
 ### Installation
 ```sh
@@ -228,5 +231,13 @@ for example:
 You can also express enums in parameters using the method `Enum`
 
 ```go
-	Parameter(NewParameter().InQuery().Name("gender").Enum(Gender{}))
+Parameter(NewParameter().InQuery().Name("gender").Enum(Gender{}))
 ```
+
+## Extensions
+
+### Self extensions
+
+## Additional properties
+
+## Generics (beta)
