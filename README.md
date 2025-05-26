@@ -167,4 +167,35 @@ Only `JSON` is currently supported
 
 ## Fields
 
+Using go structures, allow you to specify the fields in the request and response body. All exported fields will be translated into openapi components schemas.
+The default behaviour will transform the fields name into optional `snake_case` openapi fields.
+
+To have a better control on what you want to express there are a list of tags you can use.
+
+- `name`
+- `format`
+- `description`
+- `deprecated`
+- `default`
+- `min`
+- `max`
+- `required`
+- `nullable`
+
+
+Go natives types are turned into:
+
+| types | openapi
+----------------
+int8, int16, int | `type:"integer"`              |
+int32            | `type:"int32"`                |
+int64            | `type:"int,format:in64"`      |
+float32          | `type:"number,format:double"` |
+float64          | `type:"number,format:float"`  |
+bool             | `type:boolean`                |
+
+Few non primitive types are automatically preconfigured like:
+- time.Time which is equivalent to `format:date-time`
+- uuid.UUID wich is equivalent to `type:string,format:uuid` from `github.com/google/uuid` 
+
 ### Enums
