@@ -10,6 +10,7 @@ Use DSL like written in go to build your openapi yaml files.
 - [Getting started](#getting-started)
 - [Routing](#routing)
 - [Parameters](#parameters)
+- [Body description](#body)
 
 ### Installation
 ```sh
@@ -135,3 +136,16 @@ Parameter(NewParameter().InQuery().Name("id").Type("string").Format("uuid").Requ
 
 In this case the `Required()` can be omitted, if the parameter is optional
 
+## Body
+For almost anything with is not a `GET` request you need to specify the body of your request.
+
+For now the formats supported are:
+- JSON with the method `JsonBody`
+- Multipart/form-data with the method `FormData`
+
+
+example:
+
+```go
+JsonBody(Movie{}, true) // true is optional and means the body is required
+```
