@@ -170,7 +170,7 @@ Only `JSON` is currently supported
 Using go structures, allow you to specify the fields in the request and response body. All exported fields will be translated into openapi components schemas.
 The default behaviour will transform the fields name into optional `snake_case` openapi fields.
 
-To have a better control on what you want to express there are a list of tags you can use.
+To have a better control on what you want to express, here a list of tags you can use.
 
 - `name`
 - `format`
@@ -199,3 +199,34 @@ Few non primitive types are automatically preconfigured like:
 - uuid.UUID wich is equivalent to `type:string,format:uuid` from `github.com/google/uuid` 
 
 ### Enums
+
+Its quite common to have fields which can have only a set of values. They are enums, in order to express it into openapi you have to write a custom type
+for the enum fields which implement the Enum interface
+
+```go
+type Enum interface{
+  Value() []any
+}  
+```
+
+for example:
+
+```go
+
+  type Gender string
+
+  func (Gender) Values() []any{
+    return []any{"male", "female"}
+  }
+
+  type User struct {
+    Gender Gender
+  }
+```
+
+#### Enums in parameters
+You can also express enums in parameters using the method `Enum`
+
+```go
+	Parameter(NewParameter().InQuery().Name("gender").Enum(Gender{}))
+```
