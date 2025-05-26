@@ -10,7 +10,10 @@ Use DSL like written in go to build your openapi yaml files.
 - [Getting started](#getting-started)
 - [Routing](#routing)
 - [Parameters](#parameters)
-- [Body description](#body)
+- [Request Body description](#request-body)
+- [Response Body description](#response-body)
+- [Fields description](#fields)
+- [Enums](#enums)
 
 ### Installation
 ```sh
@@ -136,8 +139,8 @@ Parameter(NewParameter().InQuery().Name("id").Type("string").Format("uuid").Requ
 
 In this case the `Required()` can be omitted, if the parameter is optional
 
-## Body
-For almost anything with is not a `GET` request you need to specify the body of your request.
+## Request Body
+For almost anything which is not a `GET` request you need to specify the body of your request.
 
 For now the formats supported are:
 - JSON with the method `JsonBody`
@@ -149,3 +152,19 @@ example:
 ```go
 JsonBody(Movie{}, true) // true is optional and means the body is required
 ```
+
+## Response Body
+The same way for the response body which returns you api call, you can use your types using the method `JSON`
+
+
+```go
+Responses(
+  NewResponse(200).JSON(Movie{}).Description("return a movie object"),
+)
+```
+
+Only `JSON` is currently supported
+
+## Fields
+
+### Enums
