@@ -116,8 +116,22 @@ In every rest API you have to choose an HTTP method for each of your route. In o
 ```
 
 ## Parameters
+What would be an api without path or query parameters, you can easily describe these parameters using the following methods.
 
 ### path parameters
+For example if you have an endpoint using an `uuid` to get information about a user
+like `/api/users/{id}`
+
+```go
+Parameter(NewParameter().InPath().Name("id").Type("string").Format("uuid").Required())
+```
 
 ### query parameters
+You can also do the same using query parameters like `/api/users?id={id}`
+
+```go
+Parameter(NewParameter().InQuery().Name("id").Type("string").Format("uuid").Required())
+```
+
+In this case the `Required()` can be omitted, if the parameter is optional
 
