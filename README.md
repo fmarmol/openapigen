@@ -185,14 +185,14 @@ To have a better control on what you want to express there are a list of tags yo
 
 Go natives types are turned into:
 
-| types | openapi
-----------------
-int8, int16, int | `type:"integer"`              |
-int32            | `type:"int32"`                |
-int64            | `type:"int,format:in64"`      |
-float32          | `type:"number,format:double"` |
-float64          | `type:"number,format:float"`  |
-bool             | `type:boolean`                |
+| types | openapi |
+|-------|---------|
+|int8, int16, int | `type:"integer"`              |
+|int32            | `type:"int32"`                |
+|int64            | `type:"int,format:in64"`      |
+|float32          | `type:"number,format:double"` |
+|float64          | `type:"number,format:float"`  |
+|bool             | `type:boolean`                |
 
 Few non primitive types are automatically preconfigured like:
 - time.Time which is equivalent to `format:date-time`
