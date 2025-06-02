@@ -537,9 +537,6 @@ func (d *Document) Build() error {
 		}
 		for code, r := range path.apiResponses {
 			responses.Set(code, r)
-			// if d.globalDefaultResponse != nil {
-			// 	responses.Set("default", )
-			// }
 		}
 		for name, schema := range path.apiSchemas {
 			d.t.Components.Schemas[name] = schema
@@ -600,6 +597,4 @@ func (d *Document) Build() error {
 		d.t.Paths.Set(path, newPathItem)
 	}
 	return nil
-	// returns a map
-	// return d.t.MarshalYAML()
 }

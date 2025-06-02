@@ -26,13 +26,11 @@ type Path struct {
 	apiResponses        map[string]*openapi3.ResponseRef
 	apiSchemas          map[string]*openapi3.SchemaRef
 	componentParameters map[string]*openapi3.ParameterRef
-	// jsonBody        *Schema
-	// formData        *Schema
-	content         string
-	ref             *Schema
-	inline          []byte // WARNING: this only a temp fix to have a custom request body inline, openapi3.Response (only json) (not a ref)
-	defaultResponse *Response
-	contentRequired bool
+	content             string
+	ref                 *Schema
+	inline              []byte // WARNING: this only a temp fix to have a custom request body inline, openapi3.Response (only json) (not a ref)
+	defaultResponse     *Response
+	contentRequired     bool
 }
 
 func NewPath(path string) *Path {
@@ -41,25 +39,6 @@ func NewPath(path string) *Path {
 	p.apiResponses = make(map[string]*openapi3.ResponseRef)
 	p.apiSchemas = make(map[string]*openapi3.SchemaRef)
 	p.componentParameters = make(map[string]*openapi3.ParameterRef)
-	// //parse path
-
-	// KEEP FOR LATER
-	// elems := strings.Split(path, "/")
-	// for _, elem := range elems {
-	// 	if elem[0] == '{' && elem[len(elem)-1] == '}' {
-	// 		param := elem[1 : len(elem)-1]
-
-	// 		p.parameters = append(p.parameters, Parameter{
-	// 			in:       "path",
-	// 			_type:    "string",
-	// 			format:   "uuid",
-	// 			required: true,
-	// 			name:     param,
-	// 		})
-
-	// 	}
-	// }
-
 	return p
 }
 
@@ -415,10 +394,7 @@ func (p *Path) Response(r *Response) *Path {
 							},
 						},
 					},
-					// Ref: schema.RefPath(),
 				}
-				// p.registerSchema(schema)
-
 			}
 		}
 	}
