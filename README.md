@@ -257,12 +257,10 @@ func (Request) Extensions() map[string]map[string]any {
 		"x-go-type-skip-optional-pointer": true,
 	}}
 }
+```
 
 `x-go-type-skip-optional-pointer` is an extension supported by the project [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen)
 to remove pointer on field in golang code generation.
-
-```
-
 
 ### Self extensions
 
