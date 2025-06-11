@@ -195,7 +195,7 @@ Go natives types are turned into:
 |int64            | `type:"int,format:in64"`      |
 |float32          | `type:"number,format:double"` |
 |float64          | `type:"number,format:float"`  |
-|bool             | `type:boolean`                |
+|bool             | `type:"boolean"`                |
 
 Few non primitive types are automatically preconfigured like:
 - time.Time which is equivalent to `format:date-time`
@@ -238,11 +238,11 @@ Parameter(NewParameter().InQuery().Name("gender").Enum(Gender{}))
 
 See notes [here](https://swagger.io/docs/specification/v3_0/openapi-extensions/)
 
-You can specify extensions on schema's fields with the `ExtenstionI`
+You can specify extensions on schema's fields with the `ExtenstionI` interface.
 
 ```go
   type Extensions = map[string]any
-  type FieldName = string // its the field name in th go struct
+  type FieldName = string // its the field name in the go struct
 
   type ExtensionsI interface {
   	Extensions() map[FieldName]Extensions
