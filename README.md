@@ -236,6 +236,34 @@ Parameter(NewParameter().InQuery().Name("gender").Enum(Gender{}))
 
 ## Extensions
 
+See notes [here](https://swagger.io/docs/specification/v3_0/openapi-extensions/)
+
+You can specify extensions on schema's fields with the `ExtenstionI`
+
+```go
+  type Extensions = map[string]any
+  type FieldName = string // its the field name in th go struct
+
+  type ExtensionsI interface {
+  	Extensions() map[FieldName]Extensions
+  }
+```
+
+Let's take an example where you have a `Request` struct containing a field `MustBeThere`
+
+```go
+func (Request) Extensions() map[string]map[string]any {
+	return map[string]map[string]any{"MustBeThere": {
+		"x-go-type-skip-optional-pointer": true,
+	}}
+}
+
+`x-go-type-skip-optional-pointer` is an extension supported by the project [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen)
+to remove pointer on field in golang code generation.
+
+```
+
+
 ### Self extensions
 
 ## Additional properties
