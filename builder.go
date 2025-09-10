@@ -143,6 +143,9 @@ func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) (
 	case reflect.Int64:
 		property._type = "integer"
 		property.format = "int64"
+	case reflect.Uint64:
+		property._type = "integer"
+		property.format = "uint64"
 	case reflect.Float64:
 		property._type = "number"
 		property.format = "double"
