@@ -3,8 +3,9 @@ package openapigen
 type Pin string
 
 const (
-	PATH  Pin = "path"
-	QUERY Pin = "query"
+	PATH   Pin = "path"
+	QUERY  Pin = "query"
+	HEADER Pin = "header"
 )
 
 type Parameter struct {
@@ -39,6 +40,10 @@ func (p *Parameter) Name(name string) *Parameter {
 
 func (p *Parameter) InPath() *Parameter {
 	return p.In(PATH)
+}
+
+func (p *Parameter) InHeader() *Parameter {
+	return p.In(HEADER)
 }
 
 func (p *Parameter) InQuery() *Parameter {
