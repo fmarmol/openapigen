@@ -135,7 +135,7 @@ func setProperty(property *Property, newSchemas []*Schema, _type reflect.Type) (
 	switch kind {
 	case reflect.Pointer:
 		return setProperty(property, newSchemas, _type.Elem())
-	case reflect.Int8, reflect.Int16, reflect.Int:
+	case reflect.Int8, reflect.Int16, reflect.Int, reflect.Uint8:
 		property._type = "integer"
 	case reflect.Int32:
 		property._type = "integer"
