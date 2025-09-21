@@ -258,6 +258,9 @@ func Properties(object any) ([]Property, []*Schema) {
 		var property Property
 
 		tag := field.Tag.Get("oapi")
+		if tag == "-" {
+			continue
+		}
 		if tag == "" {
 			property.name = fieldName
 
